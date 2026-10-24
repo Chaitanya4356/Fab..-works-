@@ -1,9 +1,21 @@
+import Link from 'next/link'
 import { SignOutButton } from '@/components/sign-out-button'
+
+const LINKS = [{ href: '/settings/users', label: 'Users' }]
 
 export default function MorePage() {
   return (
     <section className="flex flex-col gap-6">
       <h1 className="text-2xl font-semibold">More</h1>
+      <ul className="flex flex-col divide-y divide-line rounded border border-line bg-surface">
+        {LINKS.map((link) => (
+          <li key={link.href}>
+            <Link href={link.href} className="flex min-h-12 items-center px-4 font-medium">
+              {link.label}
+            </Link>
+          </li>
+        ))}
+      </ul>
       <div>
         <SignOutButton />
       </div>

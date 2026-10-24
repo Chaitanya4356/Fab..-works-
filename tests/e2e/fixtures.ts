@@ -9,6 +9,10 @@ export async function login(page: Page, user: { email: string; password: string 
   await page.getByLabel('Email').fill(user.email)
   await page.getByLabel('Password').fill(user.password)
   await page.getByRole('button', { name: 'Log in' }).click()
+  // Wait for the outcome: either the app opens, or the login form shows its message.
+  await page.waitForFunction(
+    () => !location.pathname.startsWith('/login') || document.querySelector('form [role="alert"]') !== null,
+  )
 }
 
 function admin() {

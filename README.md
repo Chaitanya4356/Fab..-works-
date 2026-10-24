@@ -10,7 +10,7 @@ You need Node 24 and Docker Desktop running.
 npm install
 npx supabase start          # starts the local database; prints the URL and keys
 cp .env.example .env.local  # then paste the Publishable and Secret keys into it
-npm run dev                 # http://127.0.0.1:3000
+npm run dev                 # http://localhost:3000
 ```
 
 ## Tests

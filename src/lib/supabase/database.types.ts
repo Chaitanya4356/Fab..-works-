@@ -173,6 +173,9 @@ isOneToOne: false
 "save_doc_number_formats":
 { Args: { "p_as_of": string,"p_formats": Json }; Returns: undefined
                            },
+"set_profile_active":
+{ Args: { "p_active": boolean,"p_user": string }; Returns: undefined
+                           },
 "storage_usage":
 { Args: Record<PropertyKey, never>; Returns: {
               "database_bytes": number,"files_bytes": number
