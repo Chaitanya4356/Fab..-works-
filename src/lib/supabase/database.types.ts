@@ -23,7 +23,33 @@ export type Database = {
           }
         },"public": {
           Tables: {
-            "audit_log": {
+            "attachments": {
+                  Row: {
+                    "caption": string | null,"created_at": string,"created_by": string | null,"entity_id": string,"entity_type": string,"file_name": string | null,"file_path": string,"id": string,"mime_type": string | null,"size_bytes": number | null,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "caption"?: string | null,"created_at"?: string,"created_by"?: string | null,"entity_id": string,"entity_type": string,"file_name"?: string | null,"file_path": string,"id"?: string,"mime_type"?: string | null,"size_bytes"?: number | null,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "caption"?: string | null,"created_at"?: string,"created_by"?: string | null,"entity_id"?: string,"entity_type"?: string,"file_name"?: string | null,"file_path"?: string,"id"?: string,"mime_type"?: string | null,"size_bytes"?: number | null,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "attachments_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "attachments_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"audit_log": {
                   Row: {
                     "action": string,"changed_at": string,"changed_by": string | null,"id": number,"new_values": Json | null,"old_values": Json | null,"record_id": string,"table_name": string
                   }
@@ -146,6 +172,11 @@ isOneToOne: false
                            },
 "save_doc_number_formats":
 { Args: { "p_as_of": string,"p_formats": Json }; Returns: undefined
+                           },
+"storage_usage":
+{ Args: Record<PropertyKey, never>; Returns: {
+              "database_bytes": number,"files_bytes": number
+            }[]
                            },
 "today_ist":
 { Args: Record<PropertyKey, never>; Returns: string
