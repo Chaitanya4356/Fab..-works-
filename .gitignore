@@ -44,3 +44,7 @@ next-env.d.ts
 !.env.example
 /test-results/
 /playwright-report/
+
+# supabase cli
+supabase/.temp/
+supabase/.branches/
