@@ -37,6 +37,46 @@ export type Database = {
                   Relationships: [
                     
                   ]
+                },"doc_counters": {
+                  Row: {
+                    "doc_type": string,"highest_issued": number,"last_number": number,"series": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "doc_type": string,"highest_issued"?: number,"last_number"?: number,"series": string
+                  }
+                  Update: {
+                    "doc_type"?: string,"highest_issued"?: number,"last_number"?: number,"series"?: string
+                  }
+                  Relationships: [
+                    
+                  ]
+                },"doc_number_formats": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"digits": number,"doc_type": string,"id": string,"prefix": string,"separator": string,"updated_at": string,"updated_by": string | null,"year_style": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"digits"?: number,"doc_type": string,"id"?: string,"prefix": string,"separator"?: string,"updated_at"?: string,"updated_by"?: string | null,"year_style"?: string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"digits"?: number,"doc_type"?: string,"id"?: string,"prefix"?: string,"separator"?: string,"updated_at"?: string,"updated_by"?: string | null,"year_style"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "doc_number_formats_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "doc_number_formats_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"profiles": {
                   Row: {
                     "created_at": string,"created_by": string | null,"full_name": string,"id": string,"is_active": boolean,"login_email": string | null,"phone": string | null,"updated_at": string,"updated_by": string | null
@@ -63,14 +103,52 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"settings": {
+                  Row: {
+                    "address": string | null,"bank_account_name": string | null,"bank_account_no": string | null,"bank_ifsc": string | null,"bank_name": string | null,"city": string | null,"created_at": string,"created_by": string | null,"default_gst_rate": number,"default_margin_percent": number,"email": string | null,"gst_enabled": boolean,"gst_registered_from": string | null,"gstin": string | null,"id": number,"invoice_due_days": number,"invoice_terms": string | null,"logo_path": string | null,"phone": string | null,"pincode": string | null,"quotation_terms": string | null,"quotation_validity_days": number,"state": string | null,"state_code": string | null,"updated_at": string,"updated_by": string | null,"upi_id": string | null,"workshop_name": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "address"?: string | null,"bank_account_name"?: string | null,"bank_account_no"?: string | null,"bank_ifsc"?: string | null,"bank_name"?: string | null,"city"?: string | null,"created_at"?: string,"created_by"?: string | null,"default_gst_rate"?: number,"default_margin_percent"?: number,"email"?: string | null,"gst_enabled"?: boolean,"gst_registered_from"?: string | null,"gstin"?: string | null,"id"?: number,"invoice_due_days"?: number,"invoice_terms"?: string | null,"logo_path"?: string | null,"phone"?: string | null,"pincode"?: string | null,"quotation_terms"?: string | null,"quotation_validity_days"?: number,"state"?: string | null,"state_code"?: string | null,"updated_at"?: string,"updated_by"?: string | null,"upi_id"?: string | null,"workshop_name"?: string
+                  }
+                  Update: {
+                    "address"?: string | null,"bank_account_name"?: string | null,"bank_account_no"?: string | null,"bank_ifsc"?: string | null,"bank_name"?: string | null,"city"?: string | null,"created_at"?: string,"created_by"?: string | null,"default_gst_rate"?: number,"default_margin_percent"?: number,"email"?: string | null,"gst_enabled"?: boolean,"gst_registered_from"?: string | null,"gstin"?: string | null,"id"?: number,"invoice_due_days"?: number,"invoice_terms"?: string | null,"logo_path"?: string | null,"phone"?: string | null,"pincode"?: string | null,"quotation_terms"?: string | null,"quotation_validity_days"?: number,"state"?: string | null,"state_code"?: string | null,"updated_at"?: string,"updated_by"?: string | null,"upi_id"?: string | null,"workshop_name"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "settings_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "settings_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Views: {
             [_ in never]: never
           }
           Functions: {
-            "is_active_user":
+            "financial_year":
+{ Args: { "p_date": string }; Returns: string
+                           },
+"is_active_user":
 { Args: Record<PropertyKey, never>; Returns: boolean
+                           },
+"next_doc_number":
+{ Args: { "p_doc_date": string,"p_doc_type": string }; Returns: string
+                           },
+"save_doc_number_formats":
+{ Args: { "p_as_of": string,"p_formats": Json }; Returns: undefined
+                           },
+"today_ist":
+{ Args: Record<PropertyKey, never>; Returns: string
                            }
           }
           Enums: {
