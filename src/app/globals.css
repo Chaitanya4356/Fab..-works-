@@ -1,26 +1,34 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* SteelFlow palette: steel greys with a red-oxide primer accent. Light theme only, for daylight in the workshop. */
+@theme {
+  --color-ink: #1B232A;
+  --color-surface: #FFFFFF;
+  --color-ground: #EDF0F2;
+  --color-line: #D2D8DD;
+  --color-muted: #56616B;
+  --color-oxide: #A2412A;
+  --color-ok: #2E7A4E;
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  color-scheme: light;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--color-ground);
+  color: var(--color-ink);
+}
+
+@layer components {
+  .field {
+    @apply min-h-11 rounded border border-line bg-surface px-3 text-base text-ink outline-none focus:border-ink focus:ring-2 focus:ring-ink/20;
+  }
+  .button-primary {
+    @apply inline-flex min-h-11 items-center justify-center rounded bg-ink px-4 font-medium text-white disabled:opacity-60;
+  }
+  .button-secondary {
+    @apply inline-flex min-h-11 items-center justify-center rounded border border-line bg-surface px-4 font-medium text-ink disabled:opacity-60;
+  }
 }
