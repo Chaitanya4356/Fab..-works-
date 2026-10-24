@@ -193,7 +193,7 @@ Before the owner relies on the app (Milestone A), one backup is decrypted and re
 | Rounding | Half-up to the paisa on each line. Quotation and invoice grand totals are rounded to the nearest rupee, with the difference stored as `round_off`. |
 | Today | Always Asia/Kolkata. SQL uses `(now() at time zone 'Asia/Kolkata')::date`. |
 | Financial year | Starts 1 April. A date in April 2026 to March 2027 belongs to `2026-27`. |
-| Document numbers | `{PREFIX}/{FY}/{4-digit sequence}`. The default prefixes, editable in Settings, are `PRJ`, `QT`, `INV`, `DN` and `PO`. Each starts again at 0001 every financial year. |
+| Document numbers | Each document type has its own format, set in Settings → Document numbers (7.11). The defaults give `PRJ/2026-27/0001`, `QT/…`, `INV/…`, `DN/…` and `PO/…`, restarting at 0001 every financial year. |
 | When numbers are given | Projects, quotations, delivery notes and POs get a number when created. Invoices get a number only when **issued**, so invoice numbers have no gaps. |
 | Phone numbers | Stored as 10-digit Indian mobile numbers. `+91` is added for WhatsApp links. |
 
@@ -255,8 +255,13 @@ Enquiry → Quotation → Acceptance → Project → Stock check → Purchase �
   - Bank and UPI details for invoices: `bank_name`, `bank_account_name`, `bank_account_no`, `bank_ifsc`, `upi_id`.
   - GST: `gst_enabled boolean` default false, `gstin`, `gst_registered_from date`, `default_gst_rate numeric(5,2)` default 18.
   - Defaults: `default_margin_percent numeric(5,2)` default 15, `quotation_validity_days int` default 15, `invoice_due_days int` default 15, `quotation_terms`, `invoice_terms`.
-  - Number prefixes: `project_prefix` (default `PRJ`), `quote_prefix` (`QT`), `invoice_prefix` (`INV`), `dn_prefix` (`DN`), `po_prefix` (`PO`).
-- `doc_counters`: `doc_type` (project, quotation, invoice, dispatch, po), `financial_year` (e.g. `2026-27`), `last_number int`. Primary key `(doc_type, financial_year)`. Write-protected.
+- `doc_number_formats`: one row per document type, changed only through `save_doc_number_formats` (6.4).
+  - Columns: `doc_type` (project, quotation, invoice, dispatch, po; unique), `prefix` (required, stored in capitals, unique ignoring case), `separator` (`/`, `-` or empty), `year_style` (full, short, none) default full, `digits smallint` (1–8) default 4.
+  - Default rows: `PRJ`, `QT`, `INV`, `DN` and `PO`, each with `/`, full year and 4 digits.
+- `doc_counters`: write-protected; active users may read it.
+  - Columns: `doc_type`, `series`, `last_number int`, `highest_issued int` default 0. Primary key `(doc_type, series)`.
+  - `series` is the financial year (e.g. `2026-27`), or `all` when the format shows no year.
+  - `last_number` is the last number given out, or the chosen next number minus one.
 - `attachments`: `entity_type` (customer, supplier, worker, project, quotation, activity_update, purchase_bill, dispatch, expense), `entity_id uuid` (required), `file_path` (required), `file_name`, `mime_type`, `size_bytes int`, `caption`.
 - `audit_log`: `id bigint generated always as identity`, `table_name`, `record_id uuid`, `action` (INSERT, UPDATE, DELETE), `changed_by uuid`, `changed_at timestamptz`, `old_values jsonb`, `new_values jsonb`. It has no common columns and is write-protected.
 
@@ -354,7 +359,7 @@ Every write that touches more than one row, or a write-protected table, goes thr
 
 | Area | Functions |
 |---|---|
-| Numbering | `next_doc_number(doc_type, doc_date)` locks and increments the counter for that financial year, then returns the formatted number |
+| Numbering | `next_doc_number(doc_type, doc_date)` takes the next number in the right series and returns it formatted (7.11). `save_doc_number_formats(formats jsonb, as_of date)` saves formats and any new next numbers in one step. |
 | Quotations | `create_quotation_revision(quotation_id)`, `set_quotation_status(quotation_id, status, reason)`, `convert_quotation(quotation_id)` |
 | Stock | `record_opening_stock`, `issue_to_project`, `return_from_project`, `record_stock_count` (creates adjustments), `scrap_stock`, `reverse_movement` |
 | Offcuts | `create_offcut(material_id, project_id, qty, size_text, weight_kg, location)`, `use_offcut(offcut_id, project_id)`, `scrap_offcut(offcut_id, reason)` |
@@ -554,6 +559,22 @@ Each export is an `.xlsx` file, with date-range filters where relevant:
 
 "Export everything" produces one workbook with a sheet per main table.
 
+### 7.11 Document numbers
+
+- **Format.** Each document type has a prefix, a separator, a year style and a number of digits. The number is the prefix, the year part (if any) and the sequence, joined by the separator.
+  - Year styles: full `2026-27`, short `26-27`, or none.
+  - The sequence is padded with zeros to the chosen digits but never cut short. With 3 digits, 999 is followed by 1000.
+- **Series.** When the format shows a year, numbering restarts at 1 every 1 April, with one counter per financial year. With no year, numbering carries on across years and never restarts, so no number repeats.
+- **Next number.** Settings shows the next number for the current series and lets you change it, for example to carry on from a paper bill book.
+  - It cannot be set at or below a number already given out in that series: `Invoice numbers up to 245 have already been used. The next number must be 246 or higher.`
+  - A next number set too high by mistake can be lowered again, as long as nothing has been numbered since.
+- **Prefixes.** 1–10 characters: letters, digits, `-` and `/`, starting with a letter or digit, stored in capitals. Each document type needs its own prefix.
+- **Preview.** The Settings screen shows the next number in full as you type.
+- **GST limit.** A GST invoice number may have at most 16 characters, using only letters, digits, `-` and `/`. The default `INV/2026-27/0001` is exactly 16.
+  - When GST is switched on, an invoice format whose next number would be longer is refused: `GST invoice numbers can have at most 16 characters. This format makes 22.`
+  - While GST is off, the same message shows as a warning.
+- **Changes apply forward only.** Changing a format affects only numbers given out afterwards. Existing documents keep their numbers.
+
 ---
 
 ## 8. Worked examples (acceptance tests)
@@ -626,6 +647,14 @@ These examples must produce exactly these results. Each one becomes an automated
 - Customer in another state: IGST ₹18,000.
 - Total ₹1,18,000 in both cases.
 
+**E14. Number formats (stage 0), working on 24-10-2026.**
+- An invoice format of prefix `SBF`, separator `/`, full year, 3 digits and next number 246 gives `SBF/2026-27/246`, then `SBF/2026-27/247`.
+- A quotation format of `SBF-Q`, separator `-`, short year and 4 digits gives `SBF-Q-26-27-0001`.
+- Setting the invoice next number to 200 is then refused with `Invoice numbers up to 247 have already been used. The next number must be 248 or higher.`
+- A PO format with no year numbers a PO on 31-03-2027 as `PO/0001`, and the next one on 01-04-2027 as `PO/0002`.
+- With 3 digits, invoice 999 is followed by `SBF/2026-27/1000`.
+- With GST switched on, an invoice prefix of `SBFAB-INV` (making `SBFAB-INV/2026-27/0001`, 22 characters) is refused.
+
 ---
 
 ## 9. Build stages
@@ -641,7 +670,7 @@ Each stage follows the same steps:
 
 | Stage | Builds | Done when |
 |---|---|---|
-| **0. Foundation** (L) | Next.js app; Supabase local/test/live; login; Settings → Users (add, deactivate, reset password); Settings (workshop, logo, bank/UPI, GST switch off, prefixes); phone layout and manifest; `doc_counters` + `next_doc_number`; `audit_log` + trigger; `attachments` + upload with image shrinking; nightly backup workflow; CI workflow; Vercel deploys | The owner opens the Vercel link on a phone, logs in, adds a second user and fills in Settings. E12 passes. |
+| **0. Foundation** (L) | Next.js app; Supabase local/test/live; login; Settings → Users (add, deactivate, reset password); Settings (workshop, logo, bank/UPI, GST switch off, document number formats); phone layout and manifest; `doc_number_formats`, `doc_counters`, `next_doc_number` and `save_doc_number_formats`; `audit_log` + trigger; `attachments` + upload with image shrinking; nightly backup workflow; CI workflow; Vercel deploys | The owner opens the Vercel link on a phone, logs in, adds a second user and fills in Settings, including the document number formats. E12 and E14 pass. |
 | **1. Customers and projects** (M) | `customers`, `projects`; list, search, create, edit, deactivate; project page with tabs; project files | A real customer and project are added and a drawing is attached from a phone |
 | **2. Workers** (S) | `workers`, `project_workers`; profiles, search, deactivate, documents; project team | Workers are entered and a project page shows its team |
 | **3. Quotations** (L) | `quotations`, `quotation_cost_lines`, `quotation_items`; cost sheet, margin, generate items, totals, statuses, revisions, follow-ups; quotation PDF; WhatsApp share; `convert_quotation` (without activities); amount-in-words helper | A real quote is made, shared on WhatsApp, revised, accepted and converted. E10 and E11 pass. |
