@@ -1,7 +1,10 @@
 import Link from 'next/link'
 import { SignOutButton } from '@/components/sign-out-button'
 
-const LINKS = [{ href: '/settings/users', label: 'Users' }]
+const LINKS = [
+  { href: '/settings', label: 'Settings' },
+  { href: '/settings/users', label: 'Users' },
+]
 
 export default function MorePage() {
   return (

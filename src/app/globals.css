@@ -14,6 +14,14 @@
 
 html {
   color-scheme: light;
+  /* On phones the menu is fixed to the bottom; keep anything scrolled or tabbed into view above it. */
+  scroll-padding-bottom: calc(5rem + env(safe-area-inset-bottom));
+}
+
+@media (min-width: 768px) {
+  html {
+    scroll-padding-bottom: 0;
+  }
 }
 
 body {
