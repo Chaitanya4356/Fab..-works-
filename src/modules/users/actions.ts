@@ -21,6 +21,7 @@ export async function createUser(input: unknown): Promise<ActionResult<{ id: str
     email,
     password,
     email_confirm: true,
+    app_metadata: { steelflow_staff: true },
     user_metadata: { full_name: fullName, phone, created_by: auth.data.user.id },
   })
   if (error) {

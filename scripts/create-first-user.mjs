@@ -25,6 +25,7 @@ const { error } = await supabase.auth.admin.createUser({
   email,
   password: FIRST_USER_PASSWORD,
   email_confirm: true,
+  app_metadata: { steelflow_staff: true },
   user_metadata: { full_name: FIRST_USER_NAME.trim() },
 })
 if (error) {

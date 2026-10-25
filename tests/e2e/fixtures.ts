@@ -29,6 +29,7 @@ export async function createTestUser(user: { email: string; password: string; fu
     email: user.email,
     password: user.password,
     email_confirm: true,
+    app_metadata: { steelflow_staff: true },
     user_metadata: { full_name: user.fullName },
   })
   if (!error) return data.user.id

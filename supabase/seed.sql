@@ -15,7 +15,7 @@ begin
   ) values (
     p_id, '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated', p_email,
     extensions.crypt('password123', extensions.gen_salt('bf')), now(),
-    '{"provider": "email", "providers": ["email"]}',
+    '{"provider": "email", "providers": ["email"], "steelflow_staff": true}',
     jsonb_build_object('full_name', p_full_name, 'phone', p_phone),
     now(), now(), '', '', '', ''
   );

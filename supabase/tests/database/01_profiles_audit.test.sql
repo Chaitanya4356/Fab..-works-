@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(10);
+select plan(11);
 
 select tests.create_user('11111111-1111-1111-1111-111111111111', 'asha@steelflow.test', 'Asha Rao', '9876543210');
 select tests.create_user('22222222-2222-2222-2222-222222222222', 'ravi@steelflow.test', 'Ravi Kumar');
@@ -9,6 +9,15 @@ select results_eq(
   $$ select full_name, phone, login_email, is_active from public.profiles where id = '11111111-1111-1111-1111-111111111111' $$,
   $$ values ('Asha Rao'::text, '9876543210'::text, 'asha@steelflow.test'::text, true) $$,
   'a new login gets a profile from its details');
+
+-- A login SteelFlow did not create (e.g. a public sign-up if the hosted toggle is left on) must not get in.
+insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+values ('33333333-3333-3333-3333-333333333333', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+        'stranger@example.com', '{"provider": "email", "providers": ["email"]}', '{"full_name": "Stranger"}', now(), now());
+select results_eq(
+  $$ select is_active from public.profiles where id = '33333333-3333-3333-3333-333333333333' $$,
+  $$ values (false) $$,
+  'a login SteelFlow did not create starts switched off');
 
 select tests.authenticate_as('11111111-1111-1111-1111-111111111111');
 select ok(public.is_active_user(), 'an active user is active');
