@@ -2,6 +2,8 @@ export const MAX_FILE_BYTES = 10 * 1024 * 1024
 export const MAX_RAW_IMAGE_BYTES = 40 * 1024 * 1024
 
 const IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp']
+// Some phones' file pickers report no type (or a generic one) for photos, so the name decides.
+const IMAGE_EXTENSIONS = ['.jpg', '.jpeg', '.png', '.webp']
 const DOCUMENT_EXTENSIONS = ['.pdf', '.dwg', '.dxf']
 const HEIC = /\.hei[cf]$/i
 
@@ -13,7 +15,7 @@ export function validateFile(meta: { name: string; type: string; size: number })
   if (meta.type === 'image/heic' || meta.type === 'image/heif' || HEIC.test(name)) {
     return { ok: false, message: "HEIC photos can't be uploaded. Choose a JPEG or PNG instead." }
   }
-  if (IMAGE_TYPES.includes(meta.type)) {
+  if (IMAGE_TYPES.includes(meta.type) || IMAGE_EXTENSIONS.some((ext) => name.endsWith(ext))) {
     if (meta.size > MAX_RAW_IMAGE_BYTES) return { ok: false, message: 'This photo is too large to upload.' }
     return { ok: true, kind: 'image' }
   }

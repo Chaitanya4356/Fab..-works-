@@ -7,6 +7,10 @@ describe('validateFile', () => {
     expect(validateFile({ name: 'truss.pdf', type: 'application/pdf', size: 2_000_000 })).toEqual({ ok: true, kind: 'document' })
     expect(validateFile({ name: 'Shed GA.DWG', type: '', size: 3_000_000 })).toEqual({ ok: true, kind: 'document' })
   })
+  it('recognises photos by their name when the phone reports no file type', () => {
+    expect(validateFile({ name: 'IMG_2041.JPG', type: '', size: 4_000_000 })).toEqual({ ok: true, kind: 'image' })
+    expect(validateFile({ name: 'site.webp', type: 'application/octet-stream', size: 4_000_000 })).toEqual({ ok: true, kind: 'image' })
+  })
   it('lets big photos through because they are shrunk first', () => {
     expect(validateFile({ name: 'p.jpg', type: 'image/jpeg', size: 15_000_000 }).ok).toBe(true)
   })
