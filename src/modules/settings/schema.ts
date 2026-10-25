@@ -73,6 +73,10 @@ export const settingsSchema = z
     if (s.gstEnabled && !s.gstin) {
       ctx.addIssue({ code: 'custom', path: ['gstin'], message: 'Enter your GSTIN to switch GST on.' })
     }
+    if (s.gstEnabled && !s.state) {
+      // Invoices need the workshop's state to decide between CGST + SGST and IGST.
+      ctx.addIssue({ code: 'custom', path: ['state'], message: "Choose the workshop's state to switch GST on." })
+    }
     const stateCode = stateCodeFor(s.state)
     if (s.gstin && stateCode && s.gstin.slice(0, 2) !== stateCode) {
       ctx.addIssue({

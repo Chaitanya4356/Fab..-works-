@@ -21,6 +21,10 @@ describe('settingsSchema', () => {
   it('needs a GSTIN before GST can be switched on', () => {
     expect(errorFor({ ...valid, gstEnabled: true }, 'gstin')).toBe('Enter your GSTIN to switch GST on.')
   })
+  it('needs the workshop state before GST can be switched on', () => {
+    expect(errorFor({ ...valid, state: '', gstEnabled: true, gstin: '36ABCDE1234F1Z5' }, 'state'))
+      .toBe("Choose the workshop's state to switch GST on.")
+  })
   it('accepts a lower-case GSTIN for the same state', () => {
     expect(settingsSchema.parse({ ...valid, gstEnabled: true, gstin: '36abcde1234f1z5' }).gstin).toBe('36ABCDE1234F1Z5')
   })

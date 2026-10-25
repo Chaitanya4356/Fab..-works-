@@ -5,8 +5,9 @@ import { activeUserForAction } from '@/lib/auth'
 import { fail, ok, zodFieldErrors, type ActionResult } from '@/lib/action-result'
 import { todayIST } from '@/lib/dates'
 import { dbMessage } from '@/lib/db-errors'
-import { DOC_TYPES, makeDocNumberFormatsSchema, type DocType } from '@/lib/doc-number'
+import { DOC_TYPES, gstInvoiceLengthMessage, makeDocNumberFormatsSchema, type DocType } from '@/lib/doc-number'
 import { MESSAGES } from '@/lib/messages'
+import { getDocNumberFormats } from './queries'
 import { settingsSchema, toSettingsRow } from './schema'
 
 export async function updateSettings(input: unknown): Promise<ActionResult> {
@@ -14,6 +15,16 @@ export async function updateSettings(input: unknown): Promise<ActionResult> {
   if (!auth.ok) return auth
   const parsed = settingsSchema.safeParse(input)
   if (!parsed.success) return fail(MESSAGES.checkFields, zodFieldErrors(parsed.error))
+
+  if (parsed.data.gstEnabled) {
+    // GST invoice numbers may have at most 16 characters (spec 7.11), so check the saved invoice format first.
+    const today = todayIST()
+    const invoice = (await getDocNumberFormats(today)).invoice
+    const tooLong = gstInvoiceLengthMessage(invoice, today, invoice.nextNumber)
+    if (tooLong) {
+      return fail(MESSAGES.checkFields, { gstEnabled: `${tooLong} Shorten the invoice number format first.` })
+    }
+  }
 
   const { data, error } = await auth.data.supabase
     .from('settings')

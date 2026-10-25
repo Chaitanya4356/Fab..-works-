@@ -110,6 +110,7 @@ export function SettingsForm({ initial }: { initial: SettingsFormValues }) {
           />
           Charge GST on invoices
         </label>
+        {fieldErrors.gstEnabled && <p className="text-sm text-oxide sm:col-span-2">{fieldErrors.gstEnabled}</p>}
         {text('gstin', 'GSTIN')}
         {text('defaultGstRate', 'Default GST rate (%)', { inputMode: 'decimal' })}
       </fieldset>

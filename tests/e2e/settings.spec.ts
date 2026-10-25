@@ -68,3 +68,22 @@ test('storage use is shown against the free limits', async ({ page }) => {
   await expect(page.getByText(/^Files: .+ of 1 GB$/)).toBeVisible()
   await expect(page.getByText(/^Database: .+ of 500 MB$/)).toBeVisible()
 })
+
+test('GST cannot be switched on while invoice numbers are too long for GST', async ({ page }) => {
+  const invoice = page.getByRole('group', { name: 'Invoice numbers' })
+  await invoice.getByLabel('Prefix').fill('SBFAB-INV')
+  await invoice.getByLabel('Digits').fill('4')
+  await page.getByRole('button', { name: 'Save numbering' }).click()
+  await expect(page.getByText('Numbering saved')).toBeVisible()
+
+  await page.getByLabel('Workshop name').fill('Sri Balaji Fabricators')
+  await page.getByLabel('State').selectOption('Telangana')
+  await page.getByLabel('GSTIN').fill('36ABCDE1234F1Z5')
+  await page.getByLabel('Charge GST on invoices').check()
+  await page.getByRole('button', { name: 'Save settings' }).click()
+  await expect(
+    page.getByText(/GST invoice numbers can have at most 16 characters\. This format makes \d+\. Shorten the invoice number format first\./),
+  ).toBeVisible()
+  await page.reload()
+  await expect(page.getByLabel('Charge GST on invoices')).not.toBeChecked()
+})
