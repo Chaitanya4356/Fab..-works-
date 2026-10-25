@@ -64,3 +64,12 @@ test('the customer list pages 50 at a time', async ({ page }) => {
   await page.goto('/customers?q=Paging&page=abc')
   await expect(page.getByText('Showing 1–50 of 55')).toBeVisible()
 })
+
+test('an exact name with brackets or an apostrophe is found', async ({ page }) => {
+  await createTestCustomer({ name: 'Sai Steels (P) Ltd' })
+  await createTestCustomer({ name: "D'Souza Fabricators" })
+  for (const query of ['Sai Steels (P) Ltd', "D'Souza"]) {
+    await page.goto(`/customers?q=${encodeURIComponent(query)}`)
+    await expect(page.getByRole('row', { name: query })).toBeVisible()
+  }
+})
