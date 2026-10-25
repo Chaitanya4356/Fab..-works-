@@ -63,6 +63,32 @@ isOneToOne: false
                   Relationships: [
                     
                   ]
+                },"customers": {
+                  Row: {
+                    "address": string | null,"alt_phone": string | null,"city": string | null,"contact_person": string | null,"created_at": string,"created_by": string | null,"email": string | null,"gstin": string | null,"id": string,"is_active": boolean,"name": string,"notes": string | null,"phone": string | null,"pincode": string | null,"state": string | null,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "address"?: string | null,"alt_phone"?: string | null,"city"?: string | null,"contact_person"?: string | null,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"gstin"?: string | null,"id"?: string,"is_active"?: boolean,"name": string,"notes"?: string | null,"phone"?: string | null,"pincode"?: string | null,"state"?: string | null,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "address"?: string | null,"alt_phone"?: string | null,"city"?: string | null,"contact_person"?: string | null,"created_at"?: string,"created_by"?: string | null,"email"?: string | null,"gstin"?: string | null,"id"?: string,"is_active"?: boolean,"name"?: string,"notes"?: string | null,"phone"?: string | null,"pincode"?: string | null,"state"?: string | null,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "customers_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "customers_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"doc_counters": {
                   Row: {
                     "doc_type": string,"highest_issued": number,"last_number": number,"series": string
@@ -129,6 +155,38 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"projects": {
+                  Row: {
+                    "completed_date": string | null,"contract_value": number | null,"created_at": string,"created_by": string | null,"customer_id": string,"description": string | null,"due_date": string | null,"est_labour": number,"est_material": number,"est_other": number,"est_painting": number,"est_transport": number,"id": string,"notes": string | null,"project_no": string,"site_address": string | null,"start_date": string | null,"status": string,"title": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "completed_date"?: string | null,"contract_value"?: number | null,"created_at"?: string,"created_by"?: string | null,"customer_id": string,"description"?: string | null,"due_date"?: string | null,"est_labour"?: number,"est_material"?: number,"est_other"?: number,"est_painting"?: number,"est_transport"?: number,"id"?: string,"notes"?: string | null,"project_no": string,"site_address"?: string | null,"start_date"?: string | null,"status"?: string,"title": string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "completed_date"?: string | null,"contract_value"?: number | null,"created_at"?: string,"created_by"?: string | null,"customer_id"?: string,"description"?: string | null,"due_date"?: string | null,"est_labour"?: number,"est_material"?: number,"est_other"?: number,"est_painting"?: number,"est_transport"?: number,"id"?: string,"notes"?: string | null,"project_no"?: string,"site_address"?: string | null,"start_date"?: string | null,"status"?: string,"title"?: string,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "projects_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "projects_customer_id_fkey"
+      columns: ["customer_id"]
+isOneToOne: false
+      referencedRelation: "customers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "projects_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"settings": {
                   Row: {
                     "address": string | null,"bank_account_name": string | null,"bank_account_no": string | null,"bank_ifsc": string | null,"bank_name": string | null,"city": string | null,"created_at": string,"created_by": string | null,"default_gst_rate": number,"default_margin_percent": number,"email": string | null,"gst_enabled": boolean,"gst_registered_from": string | null,"gstin": string | null,"id": number,"invoice_due_days": number,"invoice_terms": string | null,"logo_path": string | null,"phone": string | null,"pincode": string | null,"quotation_terms": string | null,"quotation_validity_days": number,"state": string | null,"state_code": string | null,"updated_at": string,"updated_by": string | null,"upi_id": string | null,"workshop_name": string
@@ -158,7 +216,33 @@ isOneToOne: false
                 }
           }
           Views: {
-            [_ in never]: never
+            "project_list_v": {
+                  Row: {
+                    "completed_date": string | null,"contract_value": number | null,"created_at": string,"created_by": string | null,"customer_id": string,"customer_is_active": boolean,"customer_name": string,"description": string | null,"due_date": string | null,"est_labour": number,"est_material": number,"est_other": number,"est_painting": number,"est_transport": number,"id": string,"is_overdue": boolean | null,"notes": string | null,"project_no": string,"site_address": string | null,"start_date": string | null,"status": string,"title": string,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "projects_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "projects_customer_id_fkey"
+      columns: ["customer_id"]
+isOneToOne: false
+      referencedRelation: "customers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "projects_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                }
           }
           Functions: {
             "financial_year":
