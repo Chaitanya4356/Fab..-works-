@@ -5,24 +5,7 @@ import { useState, useTransition } from 'react'
 import { FormMessage, TextField } from '@/components/text-field'
 import { INDIA_STATES } from '@/lib/india-states'
 import { createCustomer, updateCustomer } from '../actions'
-
-export type CustomerFormValues = {
-  name: string
-  contactPerson: string
-  phone: string
-  altPhone: string
-  email: string
-  address: string
-  city: string
-  state: string
-  pincode: string
-  gstin: string
-  notes: string
-}
-
-export const EMPTY_CUSTOMER: CustomerFormValues = {
-  name: '', contactPerson: '', phone: '', altPhone: '', email: '', address: '', city: '', state: '', pincode: '', gstin: '', notes: '',
-}
+import type { CustomerFormValues } from '../form-values'
 
 export function CustomerForm({
   initial,

@@ -1,5 +1,6 @@
 import { requireActiveUser } from '@/lib/auth'
-import { CustomerForm, EMPTY_CUSTOMER } from '@/modules/customers/components/customer-form'
+import { CustomerForm } from '@/modules/customers/components/customer-form'
+import { EMPTY_CUSTOMER } from '@/modules/customers/form-values'
 
 export default async function NewCustomerPage({ searchParams }: PageProps<'/customers/new'>) {
   await requireActiveUser()

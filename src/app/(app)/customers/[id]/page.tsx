@@ -2,11 +2,14 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { CustomerActiveToggle } from '@/modules/customers/components/customer-active-toggle'
 import { getCustomer } from '@/modules/customers/queries'
+import { OverduePill, StatusPill } from '@/modules/projects/components/status-pill'
+import { listCustomerProjects } from '@/modules/projects/queries'
 
 export default async function CustomerPage({ params }: PageProps<'/customers/[id]'>) {
   const { id } = await params
   const customer = await getCustomer(id)
   if (!customer) notFound()
+  const projects = await listCustomerProjects(customer.id)
 
   const details: [string, React.ReactNode][] = [
     ['Contact person', customer.contact_person],
@@ -59,7 +62,22 @@ export default async function CustomerPage({ params }: PageProps<'/customers/[id
 
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-semibold">Projects</h2>
-        <p className="text-muted">No projects yet.</p>
+        {projects.length === 0 ? (
+          <p className="text-muted">No projects yet.</p>
+        ) : (
+          <ul className="flex flex-col divide-y divide-line rounded border border-line bg-surface">
+            {projects.map((p) => (
+              <li key={p.id} className="flex flex-wrap items-center gap-2 px-4 py-3">
+                <span className="font-mono text-xs text-muted">{p.projectNo}</span>
+                <Link href={`/projects/${p.id}`} className="font-medium underline-offset-4 hover:underline">
+                  {p.title}
+                </Link>
+                <StatusPill status={p.status} />
+                {p.isOverdue && <OverduePill />}
+              </li>
+            ))}
+          </ul>
+        )}
       </section>
 
       <CustomerActiveToggle id={customer.id} isActive={customer.is_active} />
