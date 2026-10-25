@@ -3,6 +3,7 @@ import { SignOutButton } from '@/components/sign-out-button'
 import { requireActiveUser } from '@/lib/auth'
 
 const LINKS = [
+  { href: '/customers', label: 'Customers' },
   { href: '/settings', label: 'Settings' },
   { href: '/settings/users', label: 'Users' },
 ]

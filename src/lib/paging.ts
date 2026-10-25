@@ -12,6 +12,11 @@ export function pageRange(page: number): { from: number; to: number } {
   return { from, to: from + PAGE_SIZE - 1 }
 }
 
+/** PostgREST answers a page past the last row with this error (HTTP 416) instead of an empty page. */
+export function isPastLastPage(error: { code?: string } | null): boolean {
+  return error?.code === 'PGRST103'
+}
+
 export function lastPage(total: number): number {
   return Math.max(1, Math.ceil(total / PAGE_SIZE))
 }

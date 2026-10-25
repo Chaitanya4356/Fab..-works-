@@ -22,6 +22,28 @@ function admin() {
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
 }
 
+/** Adds a customer directly in the local database and returns their id. */
+export async function createTestCustomer(c: {
+  name: string
+  phone?: string
+  city?: string
+  state?: string
+  isActive?: boolean
+}): Promise<string> {
+  const { data, error } = await admin()
+    .from('customers')
+    .insert({ name: c.name, phone: c.phone ?? null, city: c.city ?? null, state: c.state ?? null, is_active: c.isActive ?? true })
+    .select('id')
+    .single()
+  if (error) throw error
+  return data.id
+}
+
+export async function createTestCustomers(names: string[]): Promise<void> {
+  const { error } = await admin().from('customers').insert(names.map((name) => ({ name })))
+  if (error) throw error
+}
+
 /** Creates a confirmed local login, or returns the existing one's id. */
 export async function createTestUser(user: { email: string; password: string; fullName: string }): Promise<string> {
   const client = admin()
