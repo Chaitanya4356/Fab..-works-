@@ -44,7 +44,8 @@ test('switching a user off ends their access, even mid-session', async ({ browse
   await row.getByRole('button', { name: 'Yes, switch off' }).click()
   await expect(row).toContainText('Switched off')
 
-  await arjun.reload()
+  // Moving around inside the app (no reload) must still notice the login was switched off.
+  await arjun.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'More' }).click()
   await expect(arjun).toHaveURL(/\/login/)
   await expect(arjun.getByText('This login has been switched off. Ask another user to switch it back on.')).toBeVisible()
   await login(arjun, { email: 'arjun@steelflow.test', password: 'arjun-pass-26' })

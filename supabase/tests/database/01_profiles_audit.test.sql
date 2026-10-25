@@ -1,6 +1,6 @@
 begin;
 create extension if not exists pgtap with schema extensions;
-select plan(11);
+select plan(12);
 
 select tests.create_user('11111111-1111-1111-1111-111111111111', 'asha@steelflow.test', 'Asha Rao', '9876543210');
 select tests.create_user('22222222-2222-2222-2222-222222222222', 'ravi@steelflow.test', 'Ravi Kumar');
@@ -18,6 +18,17 @@ select results_eq(
   $$ select is_active from public.profiles where id = '33333333-3333-3333-3333-333333333333' $$,
   $$ values (false) $$,
   'a login SteelFlow did not create starts switched off');
+
+-- Supabase Auth's admin createUser writes app_metadata in a second step, after inserting the login.
+insert into auth.users (id, instance_id, aud, role, email, raw_app_meta_data, raw_user_meta_data, created_at, updated_at)
+values ('44444444-4444-4444-4444-444444444444', '00000000-0000-0000-0000-000000000000', 'authenticated', 'authenticated',
+        'kiran@steelflow.test', '{"provider": "email", "providers": ["email"]}', '{"full_name": "Kiran"}', now(), now());
+update auth.users set raw_app_meta_data = raw_app_meta_data || '{"steelflow_staff": true}'
+ where id = '44444444-4444-4444-4444-444444444444';
+select results_eq(
+  $$ select is_active from public.profiles where id = '44444444-4444-4444-4444-444444444444' $$,
+  $$ values (true) $$,
+  'a login SteelFlow created is switched on even when its flag is added after the insert');
 
 select tests.authenticate_as('11111111-1111-1111-1111-111111111111');
 select ok(public.is_active_user(), 'an active user is active');

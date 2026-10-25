@@ -1,3 +1,4 @@
+import { requireActiveUser } from '@/lib/auth'
 import { todayIST } from '@/lib/dates'
 import { DocNumberFormats } from '@/modules/settings/components/doc-number-formats'
 import { LogoField } from '@/modules/settings/components/logo-field'
@@ -15,6 +16,7 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 export default async function SettingsPage() {
+  await requireActiveUser()
   const today = todayIST()
   const [settings, usage, formats] = await Promise.all([getSettings(), getStorageUsage(), getDocNumberFormats(today)])
   const logoUrl = await getLogoUrl(settings.logo_path)

@@ -1,12 +1,14 @@
 import Link from 'next/link'
 import { SignOutButton } from '@/components/sign-out-button'
+import { requireActiveUser } from '@/lib/auth'
 
 const LINKS = [
   { href: '/settings', label: 'Settings' },
   { href: '/settings/users', label: 'Users' },
 ]
 
-export default function MorePage() {
+export default async function MorePage() {
+  await requireActiveUser()
   return (
     <section className="flex flex-col gap-6">
       <h1 className="text-2xl font-semibold">More</h1>

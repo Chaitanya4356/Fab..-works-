@@ -95,3 +95,25 @@ begin
   end loop;
 end;
 $$;
+
+-- 3. Supabase Auth's admin createUser writes app_metadata in a second step, after inserting the login, so the flag
+--    is also honoured when it first appears in an update. Only the secret key can change app_metadata.
+create function public.handle_user_flagged()
+returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
+begin
+  if coalesce((new.raw_app_meta_data ->> 'steelflow_staff')::boolean, false)
+     and not coalesce((old.raw_app_meta_data ->> 'steelflow_staff')::boolean, false) then
+    update public.profiles set is_active = true where id = new.id;
+  end if;
+  return new;
+end;
+$$;
+
+revoke execute on function public.handle_user_flagged() from public, anon;
+
+create trigger on_auth_user_flagged after update of raw_app_meta_data on auth.users
+  for each row execute function public.handle_user_flagged();

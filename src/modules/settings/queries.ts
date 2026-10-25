@@ -1,9 +1,13 @@
 import 'server-only'
+import { requireActiveUser } from '@/lib/auth'
 import { DOC_TYPES, type DocNumberFormat, type DocType } from '@/lib/doc-number'
 import { financialYear } from '@/lib/fy'
 import { createClient } from '@/lib/supabase/server'
 
+// Every query checks for an active user itself: layouts do not re-run on in-app navigation.
+
 export async function getSettings() {
+  await requireActiveUser()
   const supabase = await createClient()
   const { data, error } = await supabase.from('settings').select('*').eq('id', 1).single()
   if (error) throw error
@@ -11,6 +15,7 @@ export async function getSettings() {
 }
 
 export async function getStorageUsage(): Promise<{ filesBytes: number; databaseBytes: number }> {
+  await requireActiveUser()
   const supabase = await createClient()
   const { data, error } = await supabase.rpc('storage_usage')
   if (error) throw error
@@ -22,6 +27,7 @@ export type DocNumberFormatRow = DocNumberFormat & { nextNumber: number }
 
 /** Each document type's format and the next number its current series will give. */
 export async function getDocNumberFormats(today: string): Promise<Record<DocType, DocNumberFormatRow>> {
+  await requireActiveUser()
   const supabase = await createClient()
   const [formats, counters] = await Promise.all([
     supabase.from('doc_number_formats').select('doc_type, prefix, separator, year_style, digits'),
@@ -52,6 +58,7 @@ export async function getDocNumberFormats(today: string): Promise<Record<DocType
 /** A 10-minute link to the logo, or null. */
 export async function getLogoUrl(path: string | null): Promise<string | null> {
   if (!path) return null
+  await requireActiveUser()
   const supabase = await createClient()
   const { data } = await supabase.storage.from('files').createSignedUrl(path, 600)
   return data?.signedUrl ?? null
