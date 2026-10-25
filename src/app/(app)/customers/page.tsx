@@ -28,7 +28,7 @@ export default async function CustomersPage({ searchParams }: PageProps<'/custom
       <SearchBox placeholder="Name, mobile or city" value={q} keep={show === 'off' ? { show } : {}} />
       <Link
         href={show === 'off' ? '/customers' : '/customers?show=off'}
-        className="self-start text-sm text-muted underline underline-offset-4"
+        className="inline-flex min-h-11 items-center self-start text-sm text-muted underline underline-offset-4"
       >
         {show === 'off' ? 'Show active customers' : 'Show switched-off customers'}
       </Link>
@@ -56,12 +56,18 @@ export default async function CustomersPage({ searchParams }: PageProps<'/custom
               {rows.map((c) => (
                 <tr key={c.id} className="border-t border-line align-top">
                   <td className="px-3 py-3">
-                    <Link href={`/customers/${c.id}`} className="font-medium underline-offset-4 hover:underline">
+                    <Link href={`/customers/${c.id}`} className="flex min-h-11 items-center font-medium underline-offset-4 hover:underline">
                       {c.name}
                     </Link>
                     {c.contactPerson && <div className="text-muted">{c.contactPerson}</div>}
                   </td>
-                  <td className="px-3 py-3">{c.phone && <a href={`tel:+91${c.phone}`}>{c.phone}</a>}</td>
+                  <td className="px-3 py-3">
+                    {c.phone && (
+                      <a href={`tel:+91${c.phone}`} className="inline-flex min-h-11 items-center">
+                        {c.phone}
+                      </a>
+                    )}
+                  </td>
                   <td className="px-3 py-3">{c.city}</td>
                   <td className="px-3 py-3">
                     <span

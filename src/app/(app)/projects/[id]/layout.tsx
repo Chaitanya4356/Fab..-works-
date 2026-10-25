@@ -19,7 +19,7 @@ export default async function ProjectLayout({ children, params }: LayoutProps<'/
         <p className="font-mono text-sm text-muted">{project.project_no}</p>
         <h1 className="text-2xl font-semibold">{project.title}</h1>
         <div className="flex flex-wrap items-center gap-2 text-sm">
-          <Link href={`/customers/${project.customer_id}`} className="underline underline-offset-4">
+          <Link href={`/customers/${project.customer_id}`} className="inline-flex min-h-11 items-center underline underline-offset-4">
             {project.customer_name}
           </Link>
           <StatusPill status={project.status} />

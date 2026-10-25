@@ -58,7 +58,10 @@ export function ProjectForm({
           </select>
           {errorFor('customerId')}
           {!projectId && (
-            <Link href="/customers/new?then=project" className="font-normal text-muted underline underline-offset-4">
+            <Link
+              href="/customers/new?then=project"
+              className="inline-flex min-h-11 items-center self-start font-normal text-muted underline underline-offset-4"
+            >
               Add a new customer
             </Link>
           )}

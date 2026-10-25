@@ -43,7 +43,7 @@ export default async function ProjectsPage({ searchParams }: PageProps<'/project
               key={v.value}
               href={query ? `/projects?${query}` : '/projects'}
               aria-current={v.value === view ? 'page' : undefined}
-              className="rounded border border-line bg-surface px-3 py-1.5 text-sm aria-[current=page]:border-ink aria-[current=page]:font-medium"
+              className="inline-flex min-h-11 items-center rounded border border-line bg-surface px-3 text-sm aria-[current=page]:border-ink aria-[current=page]:font-medium"
             >
               {v.label}
             </Link>
@@ -71,7 +71,7 @@ export default async function ProjectsPage({ searchParams }: PageProps<'/project
                 <tr key={p.id} className="border-t border-line align-top">
                   <td className="px-3 py-3">
                     <div className="font-mono text-xs text-muted">{p.projectNo}</div>
-                    <Link href={`/projects/${p.id}`} className="font-medium underline-offset-4 hover:underline">
+                    <Link href={`/projects/${p.id}`} className="flex min-h-11 items-center font-medium underline-offset-4 hover:underline">
                       {p.title}
                     </Link>
                   </td>
