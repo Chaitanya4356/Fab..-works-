@@ -1,39 +1,8 @@
 import { z } from 'zod'
+import { numberIn, optionalCode, optionalText } from '@/lib/form-fields'
+import { GSTIN_PATTERN, gstinStateMessage } from '@/lib/gst'
 import { INDIA_STATES, stateCodeFor } from '@/lib/india-states'
 import type { Database } from '@/lib/supabase/database.types'
-
-const GSTIN = /^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z][1-9A-Z]Z[0-9A-Z]$/
-
-/** Optional text: trimmed, blank becomes null. */
-const optionalText = (max: number) =>
-  z
-    .string()
-    .trim()
-    .max(max, `Use at most ${max} characters.`)
-    .transform((value) => (value === '' ? null : value))
-
-/** Optional code with a fixed shape: tidied, blank becomes null, anything else must match. */
-const optionalCode = (pattern: RegExp, message: string, tidy: (value: string) => string = (v) => v) =>
-  z.string().transform((raw, ctx) => {
-    const value = tidy(raw.trim())
-    if (value === '') return null
-    if (!pattern.test(value)) {
-      ctx.addIssue({ code: 'custom', message })
-      return z.NEVER
-    }
-    return value
-  })
-
-const numberIn = (min: number, max: number, message: string, wholeOnly = false) =>
-  z.union([z.number(), z.string()]).transform((value, ctx) => {
-    const text = String(value).trim()
-    const n = Number(text)
-    if (text === '' || !Number.isFinite(n) || n < min || n > max || (wholeOnly && !Number.isInteger(n))) {
-      ctx.addIssue({ code: 'custom', message })
-      return z.NEVER
-    }
-    return n
-  })
 
 const upper = (value: string) => value.toUpperCase()
 
@@ -61,7 +30,7 @@ export const settingsSchema = z
     bankIfsc: optionalCode(/^[A-Z]{4}0[A-Z0-9]{6}$/, 'Enter an 11-character IFSC code, like SBIN0001234.', upper),
     upiId: optionalCode(/^[a-zA-Z0-9._-]{2,256}@[a-zA-Z]{2,64}$/, 'Enter a UPI ID, like workshop@okhdfcbank.'),
     gstEnabled: z.boolean(),
-    gstin: optionalCode(GSTIN, 'Enter a 15-character GSTIN, like 36ABCDE1234F1Z5.', upper),
+    gstin: optionalCode(GSTIN_PATTERN, 'Enter a 15-character GSTIN, like 36ABCDE1234F1Z5.', upper),
     defaultGstRate: numberIn(0, 100, 'Enter a number from 0 to 100.'),
     defaultMarginPercent: numberIn(0, 100, 'Enter a number from 0 to 100.'),
     quotationValidityDays: numberIn(1, 365, 'Enter a whole number of days from 1 to 365.', true),
@@ -77,14 +46,8 @@ export const settingsSchema = z
       // Invoices need the workshop's state to decide between CGST + SGST and IGST.
       ctx.addIssue({ code: 'custom', path: ['state'], message: "Choose the workshop's state to switch GST on." })
     }
-    const stateCode = stateCodeFor(s.state)
-    if (s.gstin && stateCode && s.gstin.slice(0, 2) !== stateCode) {
-      ctx.addIssue({
-        code: 'custom',
-        path: ['gstin'],
-        message: `This GSTIN is for a different state (code ${s.gstin.slice(0, 2)}). Check the state or the GSTIN.`,
-      })
-    }
+    const mismatch = gstinStateMessage(s.gstin, stateCodeFor(s.state))
+    if (mismatch) ctx.addIssue({ code: 'custom', path: ['gstin'], message: mismatch })
   })
   .transform((s) => ({ ...s, stateCode: stateCodeFor(s.state) }))
 
