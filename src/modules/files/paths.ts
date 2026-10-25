@@ -1,13 +1,8 @@
-export type AttachmentEntityType =
-  | 'customer'
-  | 'supplier'
-  | 'worker'
-  | 'project'
-  | 'quotation'
-  | 'activity_update'
-  | 'purchase_bill'
-  | 'dispatch'
-  | 'expense'
+/** Must match the check on public.attachments.entity_type. */
+export const ATTACHMENT_ENTITY_TYPES = [
+  'customer', 'supplier', 'worker', 'project', 'quotation', 'activity_update', 'purchase_bill', 'dispatch', 'expense',
+] as const
+export type AttachmentEntityType = (typeof ATTACHMENT_ENTITY_TYPES)[number]
 
 export type UploadTarget =
   | { kind: 'attachment'; entityType: AttachmentEntityType; entityId: string }
@@ -29,6 +24,14 @@ export function safeFileName(name: string): string {
   const suffix = ext ? `.${ext}` : ''
   const base = slug(dot > 0 ? trimmed.slice(0, dot) : trimmed).slice(0, MAX_NAME - suffix.length).replace(/-+$/, '')
   return `${base || 'file'}${suffix}`
+}
+
+/** True only for a file directly inside this record's own folder: "{entityType}/{entityId}/{name}". */
+export function attachmentPathBelongs(entityType: AttachmentEntityType, entityId: string, path: string): boolean {
+  const folder = `${entityType}/${entityId}/`
+  if (!path.startsWith(folder)) return false
+  const name = path.slice(folder.length)
+  return name !== '' && !name.includes('/') && !name.includes('..')
 }
 
 /** Where a file lives in the private "files" bucket. */

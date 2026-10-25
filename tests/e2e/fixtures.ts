@@ -44,6 +44,13 @@ export async function createTestCustomers(names: string[]): Promise<void> {
   if (error) throw error
 }
 
+/** How many files are stored under a folder of the private "files" bucket. */
+export async function countStoredFiles(prefix: string): Promise<number> {
+  const { data, error } = await admin().storage.from('files').list(prefix)
+  if (error) throw error
+  return data.filter((item) => item.id !== null).length
+}
+
 /** Creates a confirmed local login, or returns the existing one's id. */
 export async function createTestUser(user: { email: string; password: string; fullName: string }): Promise<string> {
   const client = admin()

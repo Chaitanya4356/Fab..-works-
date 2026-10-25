@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { requireActiveUser } from '@/lib/auth'
+import { countAttachments } from '@/modules/files/queries'
 import { ProjectTabs } from '@/modules/projects/components/project-tabs'
 import { OverduePill, StatusPill } from '@/modules/projects/components/status-pill'
 import { getProject } from '@/modules/projects/queries'
@@ -10,6 +11,7 @@ export default async function ProjectLayout({ children, params }: LayoutProps<'/
   const { id } = await params
   const project = await getProject(id)
   if (!project) notFound()
+  const fileCount = await countAttachments('project', project.id)
 
   return (
     <section className="flex flex-col gap-4">
@@ -29,7 +31,12 @@ export default async function ProjectLayout({ children, params }: LayoutProps<'/
           </Link>
         </div>
       </div>
-      <ProjectTabs tabs={[{ href: `/projects/${project.id}`, label: 'Overview' }]} />
+      <ProjectTabs
+        tabs={[
+          { href: `/projects/${project.id}`, label: 'Overview' },
+          { href: `/projects/${project.id}/files`, label: fileCount ? `Files (${fileCount})` : 'Files' },
+        ]}
+      />
       {children}
     </section>
   )
