@@ -1,0 +1,63 @@
+# Nightly encrypted backup of the Live database (spec 4.8). See docs/operations/backup-restore.md.
+#
+# GitHub runs scheduled workflows only from the default branch, so nightly runs start once this file is on `main`.
+# Repository secrets needed:
+#   SUPABASE_DB_URL    Live project → Connect → Session pooler URI (port 5432), with the password filled in.
+#                      The direct connection is IPv6-only and GitHub runners have no IPv6.
+#   BACKUP_PASSPHRASE  A long random phrase. Keep a copy in a password manager: without it no backup can be opened.
+name: Nightly backup
+
+on:
+  schedule:
+    - cron: '30 20 * * *' # 02:00 IST
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backup:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check the secrets are set
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          if [ -z "$SUPABASE_DB_URL" ] || [ -z "$BACKUP_PASSPHRASE" ]; then
+            echo "Set the SUPABASE_DB_URL and BACKUP_PASSPHRASE repository secrets first." >&2
+            exit 1
+          fi
+
+      - uses: supabase/setup-cli@v1
+        with:
+          version: 2.122.0
+
+      - name: Dump the database
+        env:
+          SUPABASE_DB_URL: ${{ secrets.SUPABASE_DB_URL }}
+        run: |
+          supabase db dump --db-url "$SUPABASE_DB_URL" --role-only -f roles.sql
+          supabase db dump --db-url "$SUPABASE_DB_URL" -f schema.sql
+          # Storage's analytics/vector/iceberg tables are unused and cannot be restored by the postgres role.
+          supabase db dump --db-url "$SUPABASE_DB_URL" --data-only --use-copy \
+            -x storage.buckets_analytics -x storage.buckets_vectors -x storage.iceberg_namespaces \
+            -x storage.iceberg_tables -x storage.vector_indexes \
+            -f data.sql
+
+      - name: Encrypt
+        env:
+          BACKUP_PASSPHRASE: ${{ secrets.BACKUP_PASSPHRASE }}
+        run: |
+          echo "BACKUP_DATE=$(date -u +%F)" >> "$GITHUB_ENV"
+          tar czf backup.tar.gz roles.sql schema.sql data.sql
+          printf '%s' "$BACKUP_PASSPHRASE" | gpg --batch --yes --pinentry-mode loopback --passphrase-fd 0 \
+            --symmetric --cipher-algo AES256 -o "steelflow-backup-$(date -u +%F).tar.gz.gpg" backup.tar.gz
+          rm roles.sql schema.sql data.sql backup.tar.gz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: steelflow-backup-${{ env.BACKUP_DATE }}
+          path: steelflow-backup-*.tar.gz.gpg
+          retention-days: 14
+          if-no-files-found: error
