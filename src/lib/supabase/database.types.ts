@@ -201,14 +201,14 @@ isOneToOne: false
                   ]
                 },"projects": {
                   Row: {
-                    "completed_date": string | null,"contract_value": number | null,"created_at": string,"created_by": string | null,"customer_id": string,"description": string | null,"due_date": string | null,"est_labour": number,"est_material": number,"est_other": number,"est_painting": number,"est_transport": number,"id": string,"notes": string | null,"project_no": string,"site_address": string | null,"start_date": string | null,"status": string,"title": string,"updated_at": string,"updated_by": string | null
+                    "completed_date": string | null,"contract_value": number | null,"created_at": string,"created_by": string | null,"customer_id": string,"description": string | null,"due_date": string | null,"est_labour": number,"est_material": number,"est_other": number,"est_painting": number,"est_transport": number,"id": string,"notes": string | null,"project_no": string,"quotation_id": string | null,"site_address": string | null,"start_date": string | null,"status": string,"title": string,"updated_at": string,"updated_by": string | null
                   }
                   ComputedFields: never
                   Insert: {
-                    "completed_date"?: string | null,"contract_value"?: number | null,"created_at"?: string,"created_by"?: string | null,"customer_id": string,"description"?: string | null,"due_date"?: string | null,"est_labour"?: number,"est_material"?: number,"est_other"?: number,"est_painting"?: number,"est_transport"?: number,"id"?: string,"notes"?: string | null,"project_no": string,"site_address"?: string | null,"start_date"?: string | null,"status"?: string,"title": string,"updated_at"?: string,"updated_by"?: string | null
+                    "completed_date"?: string | null,"contract_value"?: number | null,"created_at"?: string,"created_by"?: string | null,"customer_id": string,"description"?: string | null,"due_date"?: string | null,"est_labour"?: number,"est_material"?: number,"est_other"?: number,"est_painting"?: number,"est_transport"?: number,"id"?: string,"notes"?: string | null,"project_no": string,"quotation_id"?: string | null,"site_address"?: string | null,"start_date"?: string | null,"status"?: string,"title": string,"updated_at"?: string,"updated_by"?: string | null
                   }
                   Update: {
-                    "completed_date"?: string | null,"contract_value"?: number | null,"created_at"?: string,"created_by"?: string | null,"customer_id"?: string,"description"?: string | null,"due_date"?: string | null,"est_labour"?: number,"est_material"?: number,"est_other"?: number,"est_painting"?: number,"est_transport"?: number,"id"?: string,"notes"?: string | null,"project_no"?: string,"site_address"?: string | null,"start_date"?: string | null,"status"?: string,"title"?: string,"updated_at"?: string,"updated_by"?: string | null
+                    "completed_date"?: string | null,"contract_value"?: number | null,"created_at"?: string,"created_by"?: string | null,"customer_id"?: string,"description"?: string | null,"due_date"?: string | null,"est_labour"?: number,"est_material"?: number,"est_other"?: number,"est_painting"?: number,"est_transport"?: number,"id"?: string,"notes"?: string | null,"project_no"?: string,"quotation_id"?: string | null,"site_address"?: string | null,"start_date"?: string | null,"status"?: string,"title"?: string,"updated_at"?: string,"updated_by"?: string | null
                   }
                   Relationships: [
                     {
@@ -224,7 +224,139 @@ isOneToOne: false
       referencedRelation: "customers"
       referencedColumns: ["id"]
     },{
+      foreignKeyName: "projects_quotation_id_fkey"
+      columns: ["quotation_id"]
+isOneToOne: false
+      referencedRelation: "quotation_list_v"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "projects_quotation_id_fkey"
+      columns: ["quotation_id"]
+isOneToOne: false
+      referencedRelation: "quotations"
+      referencedColumns: ["id"]
+    },{
       foreignKeyName: "projects_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"quotation_cost_lines": {
+                  Row: {
+                    "amount": number,"category": string,"cost_rate": number,"created_at": string,"created_by": string | null,"description": string,"id": string,"qty": number,"quotation_id": string,"sort_order": number,"unit": string | null,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount": number,"category": string,"cost_rate": number,"created_at"?: string,"created_by"?: string | null,"description": string,"id"?: string,"qty": number,"quotation_id": string,"sort_order": number,"unit"?: string | null,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "amount"?: number,"category"?: string,"cost_rate"?: number,"created_at"?: string,"created_by"?: string | null,"description"?: string,"id"?: string,"qty"?: number,"quotation_id"?: string,"sort_order"?: number,"unit"?: string | null,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "quotation_cost_lines_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "quotation_cost_lines_quotation_id_fkey"
+      columns: ["quotation_id"]
+isOneToOne: false
+      referencedRelation: "quotation_list_v"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "quotation_cost_lines_quotation_id_fkey"
+      columns: ["quotation_id"]
+isOneToOne: false
+      referencedRelation: "quotations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "quotation_cost_lines_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"quotation_items": {
+                  Row: {
+                    "amount": number,"created_at": string,"created_by": string | null,"description": string,"hsn_sac": string | null,"id": string,"qty": number,"quotation_id": string,"rate": number,"sort_order": number,"unit": string | null,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "amount": number,"created_at"?: string,"created_by"?: string | null,"description": string,"hsn_sac"?: string | null,"id"?: string,"qty": number,"quotation_id": string,"rate": number,"sort_order": number,"unit"?: string | null,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "amount"?: number,"created_at"?: string,"created_by"?: string | null,"description"?: string,"hsn_sac"?: string | null,"id"?: string,"qty"?: number,"quotation_id"?: string,"rate"?: number,"sort_order"?: number,"unit"?: string | null,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "quotation_items_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "quotation_items_quotation_id_fkey"
+      columns: ["quotation_id"]
+isOneToOne: false
+      referencedRelation: "quotation_list_v"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "quotation_items_quotation_id_fkey"
+      columns: ["quotation_id"]
+isOneToOne: false
+      referencedRelation: "quotations"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "quotation_items_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"quotations": {
+                  Row: {
+                    "cost_total": number,"created_at": string,"created_by": string | null,"customer_id": string,"decided_at": string | null,"enquiry_date": string | null,"follow_up_date": string | null,"grand_total": number,"gst_amount": number,"gst_rate": number | null,"id": string,"margin_percent": number,"project_id": string | null,"quote_date": string | null,"quote_no": string,"rejection_reason": string | null,"revision": number,"round_off": number,"scope": string | null,"sent_at": string | null,"site_address": string | null,"status": string,"subtotal": number,"terms": string | null,"title": string,"updated_at": string,"updated_by": string | null,"valid_until": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "cost_total"?: number,"created_at"?: string,"created_by"?: string | null,"customer_id": string,"decided_at"?: string | null,"enquiry_date"?: string | null,"follow_up_date"?: string | null,"grand_total"?: number,"gst_amount"?: number,"gst_rate"?: number | null,"id"?: string,"margin_percent"?: number,"project_id"?: string | null,"quote_date"?: string | null,"quote_no": string,"rejection_reason"?: string | null,"revision"?: number,"round_off"?: number,"scope"?: string | null,"sent_at"?: string | null,"site_address"?: string | null,"status"?: string,"subtotal"?: number,"terms"?: string | null,"title": string,"updated_at"?: string,"updated_by"?: string | null,"valid_until"?: string | null
+                  }
+                  Update: {
+                    "cost_total"?: number,"created_at"?: string,"created_by"?: string | null,"customer_id"?: string,"decided_at"?: string | null,"enquiry_date"?: string | null,"follow_up_date"?: string | null,"grand_total"?: number,"gst_amount"?: number,"gst_rate"?: number | null,"id"?: string,"margin_percent"?: number,"project_id"?: string | null,"quote_date"?: string | null,"quote_no"?: string,"rejection_reason"?: string | null,"revision"?: number,"round_off"?: number,"scope"?: string | null,"sent_at"?: string | null,"site_address"?: string | null,"status"?: string,"subtotal"?: number,"terms"?: string | null,"title"?: string,"updated_at"?: string,"updated_by"?: string | null,"valid_until"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "quotations_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "quotations_customer_id_fkey"
+      columns: ["customer_id"]
+isOneToOne: false
+      referencedRelation: "customers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "quotations_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "project_list_v"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "quotations_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "quotations_updated_by_fkey"
       columns: ["updated_by"]
 isOneToOne: false
       referencedRelation: "profiles"
@@ -288,7 +420,7 @@ isOneToOne: false
           Views: {
             "project_list_v": {
                   Row: {
-                    "completed_date": string | null,"contract_value": number | null,"created_at": string,"created_by": string | null,"customer_id": string,"customer_is_active": boolean,"customer_name": string,"description": string | null,"due_date": string | null,"est_labour": number,"est_material": number,"est_other": number,"est_painting": number,"est_transport": number,"id": string,"is_overdue": boolean | null,"notes": string | null,"project_no": string,"site_address": string | null,"start_date": string | null,"status": string,"title": string,"updated_at": string,"updated_by": string | null
+                    "completed_date": string | null,"contract_value": number | null,"created_at": string,"created_by": string | null,"customer_id": string,"customer_is_active": boolean,"customer_name": string,"description": string | null,"due_date": string | null,"est_labour": number,"est_material": number,"est_other": number,"est_painting": number,"est_transport": number,"id": string,"is_overdue": boolean | null,"notes": string | null,"project_no": string,"quotation_id": string | null,"site_address": string | null,"start_date": string | null,"status": string,"title": string,"updated_at": string,"updated_by": string | null
                   }
                   ComputedFields: never
                   Relationships: [
@@ -303,6 +435,18 @@ isOneToOne: false
       columns: ["customer_id"]
 isOneToOne: false
       referencedRelation: "customers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "projects_quotation_id_fkey"
+      columns: ["quotation_id"]
+isOneToOne: false
+      referencedRelation: "quotation_list_v"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "projects_quotation_id_fkey"
+      columns: ["quotation_id"]
+isOneToOne: false
+      referencedRelation: "quotations"
       referencedColumns: ["id"]
     },{
       foreignKeyName: "projects_updated_by_fkey"
@@ -338,10 +482,42 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"quotation_list_v": {
+                  Row: {
+                    "customer_id": string,"customer_name": string,"follow_up_date": string | null,"grand_total": number,"id": string,"is_follow_up_due": boolean | null,"project_id": string | null,"quote_date": string | null,"quote_no": string,"revision": number,"status": string,"title": string,"valid_until": string | null
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "quotations_customer_id_fkey"
+      columns: ["customer_id"]
+isOneToOne: false
+      referencedRelation: "customers"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "quotations_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "project_list_v"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "quotations_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Functions: {
-            "financial_year":
+            "convert_quotation":
+{ Args: { "p_quotation_id": string }; Returns: string
+                           },
+"create_quotation_revision":
+{ Args: { "p_quotation_id": string }; Returns: string
+                           },
+"financial_year":
 { Args: { "p_date": string }; Returns: string
                            },
 "is_active_user":
@@ -353,8 +529,14 @@ isOneToOne: false
 "save_doc_number_formats":
 { Args: { "p_as_of": string,"p_formats": Json }; Returns: undefined
                            },
+"save_quotation_draft":
+{ Args: { "p_cost_lines": Json,"p_header": Json,"p_items": Json,"p_quotation_id": string }; Returns: string
+                           },
 "set_profile_active":
 { Args: { "p_active": boolean,"p_user": string }; Returns: undefined
+                           },
+"set_quotation_status":
+{ Args: { "p_quotation_id": string,"p_reason"?: string,"p_status": string }; Returns: undefined
                            },
 "storage_usage":
 { Args: Record<PropertyKey, never>; Returns: {

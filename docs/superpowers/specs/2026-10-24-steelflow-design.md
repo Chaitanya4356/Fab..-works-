@@ -352,6 +352,7 @@ All of these are calculated and never typed in.
 | `project_costs_v` | `project_id`, `bucket` (material, labour, painting, transport, other) and `amount`, built from the sources in 7.8 |
 | `project_summary_v` | Each project's contract value, estimate and actual per bucket, remaining per bucket, forecast cost, estimated / forecast / final profit, invoiced (before GST), received, outstanding, and progress % |
 | `worker_assignments_v` | Active workers with their open project assignments and activities not yet done |
+| `quotation_list_v` | Live quotations (not superseded) with the customer's name and `is_follow_up_due` (sent, follow-up date today or earlier) |
 | `project_team_v` | Each team place with the worker's name, trade and phone, the project's number, title and status, and `is_current` (no last day yet) |
 
 ### 6.4 Database functions
@@ -361,7 +362,7 @@ Every write that touches more than one row, or a write-protected table, goes thr
 | Area | Functions |
 |---|---|
 | Numbering | `next_doc_number(doc_type, doc_date)` takes the next number in the right series and returns it formatted (7.11). `save_doc_number_formats(formats jsonb, as_of date)` saves formats and any new next numbers in one step. |
-| Quotations | `create_quotation_revision(quotation_id)`, `set_quotation_status(quotation_id, status, reason)`, `convert_quotation(quotation_id)` |
+| Quotations | `save_quotation_draft(quotation_id, header jsonb, cost_lines jsonb, items jsonb)` saves a draft and works out every amount, `create_quotation_revision(quotation_id)`, `set_quotation_status(quotation_id, status, reason)`, `convert_quotation(quotation_id)` |
 | Stock | `record_opening_stock`, `issue_to_project`, `return_from_project`, `record_stock_count` (creates adjustments), `scrap_stock`, `reverse_movement` |
 | Offcuts | `create_offcut(material_id, project_id, qty, size_text, weight_kg, location)`, `use_offcut(offcut_id, project_id)`, `scrap_offcut(offcut_id, reason)` |
 | Purchases | `post_purchase_bill(bill_id)`, `cancel_purchase_bill(bill_id, reason)`, `record_supplier_payment`, `void_supplier_payment` |
