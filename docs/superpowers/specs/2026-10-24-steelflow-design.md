@@ -352,6 +352,7 @@ All of these are calculated and never typed in.
 | `project_costs_v` | `project_id`, `bucket` (material, labour, painting, transport, other) and `amount`, built from the sources in 7.8 |
 | `project_summary_v` | Each project's contract value, estimate and actual per bucket, remaining per bucket, forecast cost, estimated / forecast / final profit, invoiced (before GST), received, outstanding, and progress % |
 | `worker_assignments_v` | Active workers with their open project assignments and activities not yet done |
+| `project_team_v` | Each team place with the worker's name, trade and phone, the project's number, title and status, and `is_current` (no last day yet) |
 
 ### 6.4 Database functions
 

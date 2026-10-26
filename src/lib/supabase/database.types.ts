@@ -155,6 +155,50 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"project_workers": {
+                  Row: {
+                    "created_at": string,"created_by": string | null,"from_date": string | null,"id": string,"notes": string | null,"project_id": string,"role": string | null,"to_date": string | null,"updated_at": string,"updated_by": string | null,"worker_id": string
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "created_at"?: string,"created_by"?: string | null,"from_date"?: string | null,"id"?: string,"notes"?: string | null,"project_id": string,"role"?: string | null,"to_date"?: string | null,"updated_at"?: string,"updated_by"?: string | null,"worker_id": string
+                  }
+                  Update: {
+                    "created_at"?: string,"created_by"?: string | null,"from_date"?: string | null,"id"?: string,"notes"?: string | null,"project_id"?: string,"role"?: string | null,"to_date"?: string | null,"updated_at"?: string,"updated_by"?: string | null,"worker_id"?: string
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "project_workers_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_workers_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "project_list_v"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_workers_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_workers_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_workers_worker_id_fkey"
+      columns: ["worker_id"]
+isOneToOne: false
+      referencedRelation: "workers"
+      referencedColumns: ["id"]
+    }
+                  ]
                 },"projects": {
                   Row: {
                     "completed_date": string | null,"contract_value": number | null,"created_at": string,"created_by": string | null,"customer_id": string,"description": string | null,"due_date": string | null,"est_labour": number,"est_material": number,"est_other": number,"est_painting": number,"est_transport": number,"id": string,"notes": string | null,"project_no": string,"site_address": string | null,"start_date": string | null,"status": string,"title": string,"updated_at": string,"updated_by": string | null
@@ -213,6 +257,32 @@ isOneToOne: false
       referencedColumns: ["id"]
     }
                   ]
+                },"workers": {
+                  Row: {
+                    "address": string | null,"alt_phone": string | null,"created_at": string,"created_by": string | null,"emergency_contact_name": string | null,"emergency_contact_phone": string | null,"experience_years": number | null,"full_name": string,"id": string,"joining_date": string | null,"notes": string | null,"pay_rate": number | null,"pay_type": string | null,"phone": string | null,"skills": string | null,"status": string,"trade": string | null,"updated_at": string,"updated_by": string | null
+                  }
+                  ComputedFields: never
+                  Insert: {
+                    "address"?: string | null,"alt_phone"?: string | null,"created_at"?: string,"created_by"?: string | null,"emergency_contact_name"?: string | null,"emergency_contact_phone"?: string | null,"experience_years"?: number | null,"full_name": string,"id"?: string,"joining_date"?: string | null,"notes"?: string | null,"pay_rate"?: number | null,"pay_type"?: string | null,"phone"?: string | null,"skills"?: string | null,"status"?: string,"trade"?: string | null,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Update: {
+                    "address"?: string | null,"alt_phone"?: string | null,"created_at"?: string,"created_by"?: string | null,"emergency_contact_name"?: string | null,"emergency_contact_phone"?: string | null,"experience_years"?: number | null,"full_name"?: string,"id"?: string,"joining_date"?: string | null,"notes"?: string | null,"pay_rate"?: number | null,"pay_type"?: string | null,"phone"?: string | null,"skills"?: string | null,"status"?: string,"trade"?: string | null,"updated_at"?: string,"updated_by"?: string | null
+                  }
+                  Relationships: [
+                    {
+      foreignKeyName: "workers_created_by_fkey"
+      columns: ["created_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "workers_updated_by_fkey"
+      columns: ["updated_by"]
+isOneToOne: false
+      referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
                 }
           }
           Views: {
@@ -239,6 +309,32 @@ isOneToOne: false
       columns: ["updated_by"]
 isOneToOne: false
       referencedRelation: "profiles"
+      referencedColumns: ["id"]
+    }
+                  ]
+                },"project_team_v": {
+                  Row: {
+                    "from_date": string | null,"id": string,"is_current": boolean | null,"notes": string | null,"project_id": string,"project_no": string,"project_status": string,"project_title": string,"role": string | null,"to_date": string | null,"trade": string | null,"worker_id": string,"worker_name": string,"worker_phone": string | null,"worker_status": string
+                  }
+                  ComputedFields: never
+                  Relationships: [
+                    {
+      foreignKeyName: "project_workers_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "project_list_v"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_workers_project_id_fkey"
+      columns: ["project_id"]
+isOneToOne: false
+      referencedRelation: "projects"
+      referencedColumns: ["id"]
+    },{
+      foreignKeyName: "project_workers_worker_id_fkey"
+      columns: ["worker_id"]
+isOneToOne: false
+      referencedRelation: "workers"
       referencedColumns: ["id"]
     }
                   ]
