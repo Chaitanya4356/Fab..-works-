@@ -60,3 +60,13 @@ export function toWorkerRow(w: WorkerInput): Database['public']['Tables']['worke
     notes: w.notes,
   }
 }
+
+export const teamPlaceSchema = z.object({
+  workerId: z.guid('Choose a worker.'),
+  role: optionalText(80),
+  fromDate: optionalDate(),
+})
+
+export const lastDaySchema = z.object({
+  lastDay: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, 'Enter the last day.'),
+})

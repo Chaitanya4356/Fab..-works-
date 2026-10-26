@@ -58,6 +58,22 @@ export async function createTestWorker(w: {
   return data.id
 }
 
+/** Adds a project as the owner, since project numbers are only given to an active user (spec 4.4). */
+export async function createTestProject(p: { customerId: string; title: string }): Promise<{ id: string; projectNo: string }> {
+  const owner = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
+    auth: { persistSession: false, autoRefreshToken: false },
+  })
+  const { error: loginError } = await owner.auth.signInWithPassword({ email: OWNER.email, password: OWNER.password })
+  if (loginError) throw loginError
+  const { data, error } = await owner
+    .from('projects')
+    .insert({ customer_id: p.customerId, title: p.title })
+    .select('id, project_no')
+    .single()
+  if (error) throw error
+  return { id: data.id, projectNo: data.project_no }
+}
+
 export async function createTestCustomers(names: string[]): Promise<void> {
   const { error } = await admin().from('customers').insert(names.map((name) => ({ name })))
   if (error) throw error

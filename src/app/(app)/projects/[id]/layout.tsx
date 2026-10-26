@@ -5,13 +5,14 @@ import { countAttachments } from '@/modules/files/queries'
 import { ProjectTabs } from '@/modules/projects/components/project-tabs'
 import { OverduePill, StatusPill } from '@/modules/projects/components/status-pill'
 import { getProject } from '@/modules/projects/queries'
+import { countCurrentTeam } from '@/modules/workers/team-queries'
 
 export default async function ProjectLayout({ children, params }: LayoutProps<'/projects/[id]'>) {
   await requireActiveUser()
   const { id } = await params
   const project = await getProject(id)
   if (!project) notFound()
-  const fileCount = await countAttachments('project', project.id)
+  const [fileCount, teamCount] = await Promise.all([countAttachments('project', project.id), countCurrentTeam(project.id)])
 
   return (
     <section className="flex flex-col gap-4">
@@ -34,6 +35,7 @@ export default async function ProjectLayout({ children, params }: LayoutProps<'/
       <ProjectTabs
         tabs={[
           { href: `/projects/${project.id}`, label: 'Overview' },
+          { href: `/projects/${project.id}/team`, label: teamCount ? `Team (${teamCount})` : 'Team' },
           { href: `/projects/${project.id}/files`, label: fileCount ? `Files (${fileCount})` : 'Files' },
         ]}
       />

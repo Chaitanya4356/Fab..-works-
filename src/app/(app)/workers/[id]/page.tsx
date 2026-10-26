@@ -4,14 +4,15 @@ import { formatDate } from '@/lib/format'
 import { AttachmentList } from '@/modules/files/components/attachment-list'
 import { listAttachments } from '@/modules/files/queries'
 import { WorkerActiveToggle } from '@/modules/workers/components/worker-active-toggle'
-import { TRADE_LABELS, wageText, type PayType, type Trade } from '@/modules/workers/labels'
+import { TRADE_LABELS, teamDates, wageText, type PayType, type Trade } from '@/modules/workers/labels'
 import { getWorker } from '@/modules/workers/queries'
+import { listWorkerProjects } from '@/modules/workers/team-queries'
 
 export default async function WorkerPage({ params }: PageProps<'/workers/[id]'>) {
   const { id } = await params
   const worker = await getWorker(id)
   if (!worker) notFound()
-  const documents = await listAttachments('worker', worker.id)
+  const [projects, documents] = await Promise.all([listWorkerProjects(worker.id), listAttachments('worker', worker.id)])
   const isActive = worker.status === 'active'
   const emergency = [worker.emergency_contact_name, worker.emergency_contact_phone].filter(Boolean).join(' · ')
 
@@ -54,6 +55,26 @@ export default async function WorkerPage({ params }: PageProps<'/workers/[id]'>)
             </div>
           ))}
       </dl>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-lg font-semibold">Projects</h2>
+        {projects.length === 0 ? (
+          <p className="text-muted">Not on any project yet.</p>
+        ) : (
+          <ul className="flex flex-col divide-y divide-line rounded border border-line bg-surface">
+            {projects.map((p) => (
+              <li key={p.id} className="flex flex-wrap items-center gap-x-3 gap-y-1 px-4 py-2">
+                <span className="font-mono text-xs text-muted">{p.projectNo}</span>
+                <Link href={`/projects/${p.projectId}`} className="inline-flex min-h-11 items-center font-medium underline-offset-4 hover:underline">
+                  {p.projectTitle}
+                </Link>
+                {p.role && <span className="text-sm">{p.role}</span>}
+                <span className="text-sm text-muted">{teamDates(p.fromDate, p.toDate)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-semibold">Documents</h2>
