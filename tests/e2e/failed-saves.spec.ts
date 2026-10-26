@@ -28,13 +28,13 @@ test('a project save that cannot reach the server keeps what was typed', async (
 test('a customer save that cannot reach the server keeps what was typed', async ({ page }) => {
   await login(page, OWNER)
   await page.goto('/customers/new')
-  await page.getByLabel('Name').fill('Konark Industries')
+  await page.getByLabel('Company name').fill('Konark Industries')
   await page.getByLabel('Mobile').fill('9876512345')
   await page.route('**/customers/new', (route) =>
     route.request().method() === 'POST' ? route.abort('internetdisconnected') : route.continue(),
   )
   await page.getByRole('button', { name: 'Save customer' }).click()
   await expect(page.getByText(UNEXPECTED)).toBeVisible()
-  await expect(page.getByLabel('Name')).toHaveValue('Konark Industries')
+  await expect(page.getByLabel('Company name')).toHaveValue('Konark Industries')
   await expect(page.getByLabel('Mobile')).toHaveValue('9876512345')
 })

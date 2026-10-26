@@ -8,7 +8,7 @@ const upper = (value: string) => value.toUpperCase()
 
 export const customerSchema = z
   .object({
-    name: z.string().trim().min(2, 'Enter the customer’s name.').max(120, 'Use at most 120 characters.'),
+    name: z.string().trim().min(2, 'Enter the company name.').max(120, 'Use at most 120 characters.'),
     contactPerson: optionalText(80),
     phone: optionalMobile(),
     altPhone: optionalMobile(),

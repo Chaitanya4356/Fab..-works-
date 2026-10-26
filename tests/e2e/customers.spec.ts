@@ -8,7 +8,7 @@ test.beforeEach(async ({ page }) => {
 test('add a customer, find them by name or phone, and edit them', async ({ page }) => {
   await page.goto('/customers')
   await page.getByRole('link', { name: 'New customer' }).click()
-  await page.getByLabel('Name').fill('Sharma Steel Traders')
+  await page.getByLabel('Company name').fill('Sharma Steel Traders')
   await page.getByLabel('Contact person').fill('Ravi Sharma')
   await page.getByLabel('Mobile').fill('98765 43210')
   await page.getByLabel('City').fill('Hyderabad')

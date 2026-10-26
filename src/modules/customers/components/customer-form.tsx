@@ -50,7 +50,7 @@ export function CustomerForm({
   return (
     <form onSubmit={submit} className="flex flex-col gap-4">
       <div className="grid gap-4 sm:grid-cols-2">
-        <TextField label="Name" required {...bind('name')} />
+        <TextField label="Company name" required {...bind('name')} />
         <TextField label="Contact person" {...bind('contactPerson')} />
         <TextField label="Mobile" inputMode="tel" {...bind('phone')} />
         <TextField label="Other phone" inputMode="tel" {...bind('altPhone')} />

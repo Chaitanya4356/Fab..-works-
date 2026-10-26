@@ -20,7 +20,7 @@ describe('customerSchema', () => {
     expect(customerSchema.safeParse({ ...blank, name: 'Lakshmi Agro' }).success).toBe(true)
   })
   it.each([
-    ['name', ' ', 'Enter the customer’s name.'],
+    ['name', ' ', 'Enter the company name.'],
     ['phone', '12345', 'Enter a 10-digit mobile number.'],
     ['email', 'not-an-email', 'Enter a valid email address.'],
     ['pincode', '5000', 'Enter a 6-digit PIN code.'],
