@@ -21,8 +21,7 @@ test('a project save that cannot reach the server keeps what was typed', async (
 
   await page.unroute('**/projects/new')
   await page.getByRole('button', { name: 'Create project' }).click()
-  // The project page may not be compiled yet on a fresh dev server.
-  await expect(page.getByRole('heading', { name: 'Roof over loading bay' })).toBeVisible({ timeout: 15_000 })
+  await expect(page.getByRole('heading', { name: 'Roof over loading bay' })).toBeVisible()
 })
 
 test('a customer save that cannot reach the server keeps what was typed', async ({ page }) => {
