@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import { optionalCode, optionalDate, optionalMobile, optionalRupees, optionalText } from '@/lib/form-fields'
+import { formatDate } from '@/lib/format'
 import type { Database } from '@/lib/supabase/database.types'
 import { PAY_TYPES, TRADES, type PayType, type Trade } from './labels'
 
@@ -70,3 +71,13 @@ export const teamPlaceSchema = z.object({
 export const lastDaySchema = z.object({
   lastDay: z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, 'Enter the last day.'),
 })
+
+/**
+ * Why a last day cannot end a team place, or null when it can. A worker leaves between the day they joined and today;
+ * someone who has not joined yet can only be taken off on the day they were due to join.
+ */
+export function lastDayProblem(lastDay: string, fromDate: string | null, today: string): string | null {
+  if (fromDate && lastDay < fromDate) return `The last day cannot be before ${formatDate(fromDate)}, when they joined the team.`
+  if (lastDay > today && (!fromDate || lastDay > fromDate)) return 'The last day cannot be after today.'
+  return null
+}

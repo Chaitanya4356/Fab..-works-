@@ -101,3 +101,20 @@ test('a worker switched off later stays on the team, marked switched off', async
   await expect(row).toContainText('Switched off')
   await expect(page.getByLabel('Worker').getByRole('option', { name: /Team Later Off/ })).toHaveCount(0)
 })
+
+test('a last day after today is refused while the worker is on the team', async ({ page }) => {
+  const customerId = await createTestCustomer({ name: 'Team Future Customer' })
+  const project = await createTestProject({ customerId, title: 'Team future shed' })
+  await createTestWorker({ fullName: 'Team Staying Worker', trade: 'welder' })
+
+  await page.goto(`/projects/${project.id}/team`)
+  await page.getByLabel('Worker').selectOption({ label: 'Team Staying Worker · Welder' })
+  await page.getByRole('button', { name: 'Add to team' }).click()
+
+  const row = page.getByRole('list', { name: 'Current team' }).getByRole('listitem').filter({ hasText: 'Team Staying Worker' })
+  await row.getByRole('button', { name: 'Take off team' }).click()
+  await row.getByLabel('Last day').fill(istDay(2))
+  await row.getByRole('button', { name: 'Confirm' }).click()
+  await expect(row.getByText('The last day cannot be after today.')).toBeVisible()
+  await expect(teamTab(page)).toHaveText('Team (1)')
+})

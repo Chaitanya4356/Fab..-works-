@@ -2,6 +2,8 @@ import { expect, test } from '@playwright/test'
 import { OWNER, TEST_PDF, countStoredFiles, createTestCustomer, login } from './fixtures'
 
 test('attach a drawing and a site photo to a project, then remove one', async ({ page }) => {
+  // Draws, shrinks and uploads a 3000×2000 photo as well as a PDF: the slowest flow in the suite.
+  test.slow()
   await createTestCustomer({ name: 'Files Test Customer' })
   await login(page, OWNER)
   await page.goto('/projects/new')

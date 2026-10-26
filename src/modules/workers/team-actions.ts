@@ -5,9 +5,9 @@ import { z } from 'zod'
 import { activeUserForAction } from '@/lib/auth'
 import { fail, ok, zodFieldErrors, type ActionResult } from '@/lib/action-result'
 import { dbMessage } from '@/lib/db-errors'
-import { formatDate } from '@/lib/format'
+import { todayIST } from '@/lib/dates'
 import { MESSAGES } from '@/lib/messages'
-import { lastDaySchema, teamPlaceSchema } from './schema'
+import { lastDayProblem, lastDaySchema, teamPlaceSchema } from './schema'
 
 const idSchema = z.guid()
 
@@ -56,11 +56,8 @@ export async function endTeamPlace(placeId: string, input: unknown): Promise<Act
     .eq('id', placeId)
     .maybeSingle()
   if (!place) return fail(MESSAGES.unexpected)
-  if (place.from_date && lastDay < place.from_date) {
-    return fail(MESSAGES.checkFields, {
-      lastDay: `The last day cannot be before ${formatDate(place.from_date)}, when they joined the team.`,
-    })
-  }
+  const problem = lastDayProblem(lastDay, place.from_date, todayIST())
+  if (problem) return fail(MESSAGES.checkFields, { lastDay: problem })
 
   // Only an open place is ended; one already taken off (another screen, a double tap) is left as it is.
   const { error } = await supabase.from('project_workers').update({ to_date: lastDay }).eq('id', placeId).is('to_date', null)
