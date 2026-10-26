@@ -3,10 +3,12 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
-const ITEMS = [
+// wideOnly items appear in the side menu; the phone bar fits six labels at 360 px (spec 4.11).
+const ITEMS: { href: string; label: string; wideOnly?: boolean }[] = [
   { href: '/', label: 'Home' },
   { href: '/customers', label: 'Customers' },
   { href: '/projects', label: 'Projects' },
+  { href: '/workers', label: 'Workers', wideOnly: true },
   { href: '/quotes', label: 'Quotes' },
   { href: '/money', label: 'Money' },
   { href: '/more', label: 'More' },
@@ -25,7 +27,7 @@ export function AppNav() {
       <p className="hidden px-6 pb-2 pt-6 text-lg font-semibold md:block">SteelFlow</p>
       <ul className="grid grid-cols-6 md:flex md:flex-col md:gap-1 md:px-3">
         {ITEMS.map((item) => (
-          <li key={item.href}>
+          <li key={item.href} className={item.wideOnly ? 'hidden md:block' : undefined}>
             <Link
               href={item.href}
               aria-current={isCurrent(item.href) ? 'page' : undefined}

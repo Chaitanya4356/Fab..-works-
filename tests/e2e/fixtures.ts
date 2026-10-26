@@ -39,6 +39,22 @@ export async function createTestCustomer(c: {
   return data.id
 }
 
+/** Adds a worker directly in the local database and returns their id. */
+export async function createTestWorker(w: {
+  fullName: string
+  phone?: string
+  trade?: string
+  status?: 'active' | 'inactive'
+}): Promise<string> {
+  const { data, error } = await admin()
+    .from('workers')
+    .insert({ full_name: w.fullName, phone: w.phone ?? null, trade: w.trade ?? null, status: w.status ?? 'active' })
+    .select('id')
+    .single()
+  if (error) throw error
+  return data.id
+}
+
 export async function createTestCustomers(names: string[]): Promise<void> {
   const { error } = await admin().from('customers').insert(names.map((name) => ({ name })))
   if (error) throw error
