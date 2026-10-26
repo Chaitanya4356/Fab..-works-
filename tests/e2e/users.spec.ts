@@ -32,29 +32,37 @@ test('a login email can only be used once', async ({ page }) => {
 
 test('switching a user off ends their access, even mid-session', async ({ browser }) => {
   await createTestUser({ email: 'arjun@steelflow.test', password: 'arjun-pass-26', fullName: 'Arjun Das' })
-  const arjun = await (await browser.newContext()).newPage()
-  await login(arjun, { email: 'arjun@steelflow.test', password: 'arjun-pass-26' })
-  await expect(arjun).toHaveURL('/')
+  // Two people at once, each in a browser of their own; both are closed even when a step fails.
+  const arjunContext = await browser.newContext()
+  const ownerContext = await browser.newContext()
+  try {
+    const arjun = await arjunContext.newPage()
+    await login(arjun, { email: 'arjun@steelflow.test', password: 'arjun-pass-26' })
+    await expect(arjun).toHaveURL('/')
 
-  const owner = await (await browser.newContext()).newPage()
-  await login(owner, OWNER)
-  await owner.goto('/settings/users')
-  const row = owner.getByRole('row', { name: /Arjun Das/ })
-  await row.getByRole('button', { name: 'Switch off' }).click()
-  await row.getByRole('button', { name: 'Yes, switch off' }).click()
-  await expect(row).toContainText('Switched off')
+    const owner = await ownerContext.newPage()
+    await login(owner, OWNER)
+    await owner.goto('/settings/users')
+    const row = owner.getByRole('row', { name: /Arjun Das/ })
+    await row.getByRole('button', { name: 'Switch off' }).click()
+    await row.getByRole('button', { name: 'Yes, switch off' }).click()
+    await expect(row).toContainText('Switched off')
 
-  // Moving around inside the app (no reload) must still notice the login was switched off.
-  await arjun.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'More' }).click()
-  await expect(arjun).toHaveURL(/\/login/)
-  await expect(arjun.getByText('This login has been switched off. Ask another user to switch it back on.')).toBeVisible()
-  await login(arjun, { email: 'arjun@steelflow.test', password: 'arjun-pass-26' })
-  await expect(arjun.getByText('This login has been switched off. Ask another user to switch it back on.')).toBeVisible()
+    // Moving around inside the app (no reload) must still notice the login was switched off.
+    await arjun.getByRole('navigation', { name: 'Main' }).getByRole('link', { name: 'More' }).click()
+    await expect(arjun).toHaveURL(/\/login/)
+    await expect(arjun.getByText('This login has been switched off. Ask another user to switch it back on.')).toBeVisible()
+    await login(arjun, { email: 'arjun@steelflow.test', password: 'arjun-pass-26' })
+    await expect(arjun.getByText('This login has been switched off. Ask another user to switch it back on.')).toBeVisible()
 
-  await row.getByRole('button', { name: 'Switch on' }).click()
-  await expect(row).toContainText('Active')
-  await login(arjun, { email: 'arjun@steelflow.test', password: 'arjun-pass-26' })
-  await expect(arjun).toHaveURL('/')
+    await row.getByRole('button', { name: 'Switch on' }).click()
+    await expect(row).toContainText('Active')
+    await login(arjun, { email: 'arjun@steelflow.test', password: 'arjun-pass-26' })
+    await expect(arjun).toHaveURL('/')
+  } finally {
+    await arjunContext.close()
+    await ownerContext.close()
+  }
 })
 
 test('your own row cannot be switched off', async ({ page }) => {
