@@ -7,7 +7,7 @@
 **Architecture:** This builds on stages 0 and 1.
 - **Tables:** two new tables, `workers` and `project_workers`, with RLS.
 - **Shared view:** a `security_invoker` view `project_team_v` joins team places with worker and project names. The project's Team tab and the worker's profile both read it, so neither module queries the other's tables (spec 4.3).
-- **Screens:** a Workers list under More, worker pages, and a new Team tab on the project page. They follow Stage 1's customer screens: Server Components read through module queries that start with `requireActiveUser()`, and client forms call server actions through `runAction`.
+- **Screens:** a Workers list with its own main-menu item, worker pages, and a new Team tab on the project page. They follow Stage 1's customer screens: Server Components read through module queries that start with `requireActiveUser()`, and client forms call server actions through `runAction`.
 - **Documents:** these reuse Stage 1's attachment pipeline, with `worker` added as a file owner.
 
 **Tech Stack:** As stage 1: Next.js 16.4 App Router, React 19, TypeScript, Tailwind 4, Supabase via `@supabase/ssr` 0.12, Zod 4, Vitest, pgTAP, Playwright.
@@ -51,7 +51,7 @@ Stage 1's plan (`docs/superpowers/plans/2026-10-25-stage-1-customers-projects.md
 - **A pay rate and a pay type go together.** A rate with no type, or a type with no rate, is refused. The rate is at most ₹10,00,000, which fits `numeric(12,2)` with room to spare.
 - **Experience** is 0 to 99.9 years, with at most one decimal, to fit `numeric(4,1)` without silent rounding.
 - **Later stages fill in the rest of the worker profile.** Activity assignments arrive in stage 6, labour entries in stage 7, and `worker_assignments_v` in stage 8.
-- **Workers stay under More,** as in spec 4.11. The main menu already has six items, and a seventh does not fit a 360 px phone.
+- **Workers gets its own main-menu item, after Projects** (owner's request, 26-10-2026). The side menu on wide screens shows it. The phone bar fits only six labels at 360 px, so on phones Workers stays under More until the phone pass after stage 8. Spec 4.11 records this.
 - **Owner decision, 26-10-2026:** the phone "done when" check, the hosted setup and the Live releases wait until every stage is built. Stage 2 is checked by the owner on `localhost`. Spec section 9 records this.
 
 ## Review Focus
@@ -186,7 +186,10 @@ git add -A && git commit -m "feat: add workers and project team tables"
 - Create:
   - Module: `src/modules/workers/labels.ts`, `src/modules/workers/schema.ts`, `src/modules/workers/form-values.ts`, `src/modules/workers/queries.ts`, `src/modules/workers/actions.ts`, `src/modules/workers/components/worker-form.tsx`, `src/modules/workers/components/worker-active-toggle.tsx`
   - Screens: `src/app/(app)/workers/page.tsx`, `src/app/(app)/workers/new/page.tsx`, `src/app/(app)/workers/[id]/page.tsx`, `src/app/(app)/workers/[id]/edit/page.tsx`
-- Modify: `src/app/(app)/more/page.tsx` (a `Workers` link first), `tests/e2e/fixtures.ts`
+- Modify:
+  - `src/components/app-nav.tsx`: a Workers item after Projects, shown from 768 px only.
+  - `src/app/(app)/more/page.tsx`: a `Workers` link first, shown on phones only.
+  - `tests/e2e/fixtures.ts`.
 - Test: `tests/unit/worker-schema.test.ts`, `tests/unit/worker-labels.test.ts`, `tests/e2e/workers.spec.ts`
 
 **Interfaces:**
@@ -216,6 +219,7 @@ git add -A && git commit -m "feat: add workers and project team tables"
 
     The button is `Save worker`.
   - In `tests/e2e/fixtures.ts`, `createTestWorker(w: { fullName: string; phone?: string; trade?: string; status?: 'active' | 'inactive' }): Promise<string>`, an admin insert.
+  - **Main menu.** `ITEMS` in `app-nav.tsx` gains `{ href: '/workers', label: 'Workers', wideOnly: true }` after Projects. A `wideOnly` item's `<li>` is `hidden md:block`, so the phone bar keeps its six slots. The More page's `Workers` link is `md:hidden`.
 
 - [ ] **Step 1: Write the failing tests.**
 
@@ -328,6 +332,18 @@ test('a bad entry keeps what was typed and says what to fix', async ({ page }) =
   await page.getByLabel('Experience (years)').fill('5')
   await page.getByRole('button', { name: 'Save worker' }).click()
   await expect(page.getByText('Choose daily, hourly or monthly.')).toBeVisible()
+})
+
+test.describe('on a wide screen', () => {
+  test.use({ viewport: { width: 1280, height: 800 }, isMobile: false, hasTouch: false })
+  test('Workers has its own item in the side menu', async ({ page }) => {
+    const nav = page.getByRole('navigation', { name: 'Main' })
+    await nav.getByRole('link', { name: 'Workers' }).click()
+    await expect(page.getByRole('heading', { name: 'Workers' })).toBeVisible()
+    await expect(nav.getByRole('link', { name: 'Workers' })).toHaveAttribute('aria-current', 'page')
+    await nav.getByRole('link', { name: 'More' }).click()
+    await expect(page.getByRole('main').getByRole('link', { name: 'Workers' })).toHaveCount(0)
+  })
 })
 
 test('a worker who is switched off leaves the list but keeps their record', async ({ page }) => {

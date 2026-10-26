@@ -206,7 +206,7 @@ Before the owner relies on the app (Milestone A), one backup is decrypted and re
 
 ### 4.11 Screens and navigation
 
-- **Phones first.** A bottom bar with Home, Customers, Projects, Quotes, Money (invoices and payments) and More (workers, stock, suppliers, purchases, expenses, reports, settings). Wider screens get a side menu instead.
+- **Phones first.** A bottom bar with Home, Customers, Projects, Quotes, Money (invoices and payments) and More (workers, stock, suppliers, purchases, expenses, reports, settings). Wider screens get a side menu instead, which also lists Workers after Projects (owner's request, 26-10-2026). Whether the phone bar gets a seventh item is decided in the phone pass after stage 8.
 - **Touch and forms:** touch targets at least 44 px, numeric keyboards for amounts and quantities, and dates picked with the native date input.
 - **Lists:** searchable by name, phone or document number, and paged 50 rows at a time.
 - **Add to Home Screen:** a web app manifest and icons make this possible. There is no service worker and no offline mode.
