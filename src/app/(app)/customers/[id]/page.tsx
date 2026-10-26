@@ -1,15 +1,18 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
+import { formatINR } from '@/lib/format'
 import { CustomerActiveToggle } from '@/modules/customers/components/customer-active-toggle'
 import { getCustomer } from '@/modules/customers/queries'
 import { OverduePill, StatusPill } from '@/modules/projects/components/status-pill'
 import { listCustomerProjects } from '@/modules/projects/queries'
+import { QuotationStatusPill } from '@/modules/quotations/components/status-pill'
+import { listCustomerQuotations } from '@/modules/quotations/queries'
 
 export default async function CustomerPage({ params }: PageProps<'/customers/[id]'>) {
   const { id } = await params
   const customer = await getCustomer(id)
   if (!customer) notFound()
-  const projects = await listCustomerProjects(customer.id)
+  const [projects, quotations] = await Promise.all([listCustomerProjects(customer.id), listCustomerQuotations(customer.id)])
 
   const details: [string, React.ReactNode][] = [
     ['Contact person', customer.contact_person],
@@ -43,9 +46,14 @@ export default async function CustomerPage({ params }: PageProps<'/customers/[id
           Edit
         </Link>
         {customer.is_active && (
-          <Link href={`/projects/new?customer=${customer.id}`} className="button-secondary">
-            New project
-          </Link>
+          <>
+            <Link href={`/quotes/new?customer=${customer.id}`} className="button-secondary">
+              New quotation
+            </Link>
+            <Link href={`/projects/new?customer=${customer.id}`} className="button-secondary">
+              New project
+            </Link>
+          </>
         )}
       </div>
 
@@ -59,6 +67,26 @@ export default async function CustomerPage({ params }: PageProps<'/customers/[id
             </div>
           ))}
       </dl>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-lg font-semibold">Quotations</h2>
+        {quotations.length === 0 ? (
+          <p className="text-muted">No quotations yet.</p>
+        ) : (
+          <ul className="flex flex-col divide-y divide-line rounded border border-line bg-surface">
+            {quotations.map((q) => (
+              <li key={q.id} className="flex flex-wrap items-center gap-2 px-4 py-2">
+                <span className="font-mono text-xs text-muted">{q.label}</span>
+                <Link href={`/quotes/${q.id}`} className="inline-flex min-h-11 items-center font-medium underline-offset-4 hover:underline">
+                  {q.title}
+                </Link>
+                <QuotationStatusPill status={q.status} />
+                <span className="text-sm tabular-nums">{formatINR(q.grandTotal)}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+      </section>
 
       <section className="flex flex-col gap-2">
         <h2 className="text-lg font-semibold">Projects</h2>

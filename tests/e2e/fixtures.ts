@@ -58,13 +58,19 @@ export async function createTestWorker(w: {
   return data.id
 }
 
-/** Adds a project as the owner, since project numbers are only given to an active user (spec 4.4). */
-export async function createTestProject(p: { customerId: string; title: string }): Promise<{ id: string; projectNo: string }> {
+/** A database client signed in as the owner, for records only an active user can number (spec 4.4). */
+export async function ownerClient() {
   const owner = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!, {
     auth: { persistSession: false, autoRefreshToken: false },
   })
-  const { error: loginError } = await owner.auth.signInWithPassword({ email: OWNER.email, password: OWNER.password })
-  if (loginError) throw loginError
+  const { error } = await owner.auth.signInWithPassword({ email: OWNER.email, password: OWNER.password })
+  if (error) throw error
+  return owner
+}
+
+/** Adds a project as the owner, since project numbers are only given to an active user. */
+export async function createTestProject(p: { customerId: string; title: string }): Promise<{ id: string; projectNo: string }> {
+  const owner = await ownerClient()
   const { data, error } = await owner
     .from('projects')
     .insert({ customer_id: p.customerId, title: p.title })
@@ -72,6 +78,33 @@ export async function createTestProject(p: { customerId: string; title: string }
     .single()
   if (error) throw error
   return { id: data.id, projectNo: data.project_no }
+}
+
+/** Saves a quotation through SteelFlow's own functions, and sends or accepts it when asked. */
+export async function createTestQuotation(q: {
+  customerId: string
+  title: string
+  scope?: string
+  costLines?: { category: string; description: string; qty: number; costRate: number }[]
+  items: { description: string; qty: number; rate: number; unit?: string }[]
+  status?: 'sent' | 'accepted'
+}): Promise<{ id: string; quoteNo: string }> {
+  const owner = await ownerClient()
+  const today = new Date(Date.now() + 5.5 * 3600_000).toISOString().slice(0, 10)
+  const { data: id, error } = await owner.rpc('save_quotation_draft', {
+    p_quotation_id: null,
+    p_header: { customer_id: q.customerId, title: q.title, scope: q.scope ?? null, quote_date: today, margin_percent: 15 },
+    p_cost_lines: (q.costLines ?? []).map((l) => ({ category: l.category, description: l.description, qty: l.qty, unit: null, cost_rate: l.costRate })),
+    p_items: q.items.map((i) => ({ description: i.description, qty: i.qty, unit: i.unit ?? null, rate: i.rate })),
+  })
+  if (error) throw error
+  for (const status of q.status === 'accepted' ? ['sent', 'accepted'] : q.status ? [q.status] : []) {
+    const { error: statusError } = await owner.rpc('set_quotation_status', { p_quotation_id: id, p_status: status })
+    if (statusError) throw statusError
+  }
+  const { data, error: readError } = await owner.from('quotations').select('quote_no').eq('id', id).single()
+  if (readError) throw readError
+  return { id, quoteNo: data.quote_no }
 }
 
 export async function createTestCustomers(names: string[]): Promise<void> {

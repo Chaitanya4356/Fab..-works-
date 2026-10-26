@@ -64,3 +64,33 @@ export const optionalMobile = () =>
   })
 
 export const optionalDate = () => optionalCode(/^\d{4}-\d{2}-\d{2}$/, 'Enter a date.')
+
+/** An amount that must be given, typed the Indian way. */
+export const requiredRupees = () =>
+  rupees(null)
+    .refine((value) => value !== null, RUPEES_MESSAGE)
+    .transform((value) => value as number)
+
+// numeric(14,3): up to 11 digits before the point and 3 after, and more than nothing.
+const QUANTITY = /^\d{1,11}(\.\d{1,3})?$/
+
+export const quantity = () =>
+  z.union([z.number(), z.string()]).transform((value, ctx): number => {
+    const text = String(value).replace(/[,\s]/g, '')
+    if (!QUANTITY.test(text) || Number(text) <= 0) {
+      ctx.addIssue({ code: 'custom', message: 'Enter a quantity, like 12 or 12.5.' })
+      return z.NEVER
+    }
+    return Number(text)
+  })
+
+/** A percentage such as a margin, numeric(5,2). */
+export const percent = () =>
+  z.union([z.number(), z.string()]).transform((value, ctx): number => {
+    const text = String(value).trim()
+    if (!/^\d{1,3}(\.\d{1,2})?$/.test(text)) {
+      ctx.addIssue({ code: 'custom', message: 'Enter a margin like 15 or 12.5.' })
+      return z.NEVER
+    }
+    return Number(text)
+  })
