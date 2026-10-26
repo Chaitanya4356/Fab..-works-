@@ -668,6 +668,8 @@ Each stage follows the same steps:
 5. The owner checks the stage's **done when** on a phone.
 6. Commit on `dev`, then release to Live after approval.
 
+**Owner decision (26-10-2026):** until every stage is built, step 5 is done on `localhost`, and the Live releases wait. The phone check of every stage's **done when**, the hosted setup and the first release to Live happen together after stage 8.
+
 | Stage | Builds | Done when |
 |---|---|---|
 | **0. Foundation** (L) | Next.js app; Supabase local/test/live; login; Settings → Users (add, deactivate, reset password); Settings (workshop, logo, bank/UPI, GST switch off, document number formats); phone layout and manifest; `doc_number_formats`, `doc_counters`, `next_doc_number` and `save_doc_number_formats`; `audit_log` + trigger; `attachments` + upload with image shrinking; nightly backup workflow; CI workflow; Vercel deploys | The owner opens the Vercel link on a phone, logs in, adds a second user and fills in Settings, including the document number formats. E12 and E14 pass. |
