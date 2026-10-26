@@ -22,6 +22,9 @@ function admin() {
   return createClient(url, key, { auth: { persistSession: false, autoRefreshToken: false } })
 }
 
+/** A tiny valid PDF for upload tests. */
+export const TEST_PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Count 0/Kids[]>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n')
+
 /** Adds a customer directly in the local database and returns their id. */
 export async function createTestCustomer(c: {
   name: string

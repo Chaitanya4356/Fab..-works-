@@ -1,6 +1,8 @@
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { formatDate } from '@/lib/format'
+import { AttachmentList } from '@/modules/files/components/attachment-list'
+import { listAttachments } from '@/modules/files/queries'
 import { WorkerActiveToggle } from '@/modules/workers/components/worker-active-toggle'
 import { TRADE_LABELS, wageText, type PayType, type Trade } from '@/modules/workers/labels'
 import { getWorker } from '@/modules/workers/queries'
@@ -9,6 +11,7 @@ export default async function WorkerPage({ params }: PageProps<'/workers/[id]'>)
   const { id } = await params
   const worker = await getWorker(id)
   if (!worker) notFound()
+  const documents = await listAttachments('worker', worker.id)
   const isActive = worker.status === 'active'
   const emergency = [worker.emergency_contact_name, worker.emergency_contact_phone].filter(Boolean).join(' · ')
 
@@ -51,6 +54,16 @@ export default async function WorkerPage({ params }: PageProps<'/workers/[id]'>)
             </div>
           ))}
       </dl>
+
+      <section className="flex flex-col gap-2">
+        <h2 className="text-lg font-semibold">Documents</h2>
+        <AttachmentList
+          entityType="worker"
+          entityId={worker.id}
+          items={documents}
+          hint="ID proof, certificates and photos. Photos are made smaller before upload; other files can be up to 10 MB."
+        />
+      </section>
 
       <WorkerActiveToggle id={worker.id} isActive={isActive} />
     </section>

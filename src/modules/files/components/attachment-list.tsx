@@ -9,14 +9,18 @@ import { recordAttachment, removeAttachment } from '../actions'
 import type { AttachmentEntityType } from '../paths'
 import type { AttachmentRow } from '../queries'
 
+const PROJECT_HINT = 'Drawings, site photos and documents. Photos are made smaller before upload; other files can be up to 10 MB.'
+
 export function AttachmentList({
   entityType,
   entityId,
   items,
+  hint = PROJECT_HINT,
 }: {
   entityType: AttachmentEntityType
   entityId: string
   items: AttachmentRow[]
+  hint?: string
 }) {
   const router = useRouter()
   const [progress, setProgress] = useState<string | null>(null)
@@ -76,9 +80,7 @@ export function AttachmentList({
           className="text-sm"
         />
       </label>
-      <p className="text-sm text-muted">
-        Drawings, site photos and documents. Photos are made smaller before upload; other files can be up to 10 MB.
-      </p>
+      <p className="text-sm text-muted">{hint}</p>
       {progress && <p className="text-sm text-muted">{progress}</p>}
       {errors.length > 0 && (
         <ul className="flex flex-col gap-1 text-sm text-oxide">

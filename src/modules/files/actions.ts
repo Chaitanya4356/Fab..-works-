@@ -27,8 +27,9 @@ const targetSchema = z.discriminatedUnion('kind', [
 ])
 
 /** Records that have a screen with files so far, and the page that lists their files. Later stages add theirs. */
-const FILE_OWNERS: Partial<Record<AttachmentEntityType, { table: 'projects'; page: (id: string) => string }>> = {
+const FILE_OWNERS: Partial<Record<AttachmentEntityType, { table: 'projects' | 'workers'; page: (id: string) => string }>> = {
   project: { table: 'projects', page: (id) => `/projects/${id}/files` },
+  worker: { table: 'workers', page: (id) => `/workers/${id}` },
 }
 
 const recordSchema = z.object({

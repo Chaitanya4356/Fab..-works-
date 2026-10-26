@@ -1,7 +1,5 @@
 import { expect, test } from '@playwright/test'
-import { OWNER, countStoredFiles, createTestCustomer, login } from './fixtures'
-
-const PDF = Buffer.from('%PDF-1.4\n1 0 obj<</Type/Catalog/Pages 2 0 R>>endobj\n2 0 obj<</Type/Pages/Count 0/Kids[]>>endobj\ntrailer<</Root 1 0 R>>\n%%EOF\n')
+import { OWNER, TEST_PDF, countStoredFiles, createTestCustomer, login } from './fixtures'
 
 test('attach a drawing and a site photo to a project, then remove one', async ({ page }) => {
   await createTestCustomer({ name: 'Files Test Customer' })
@@ -14,7 +12,7 @@ test('attach a drawing and a site photo to a project, then remove one', async ({
   const projectId = new URL(page.url()).pathname.split('/')[2]
 
   await page.getByRole('navigation', { name: 'Project sections' }).getByRole('link', { name: /Files/ }).click()
-  await page.getByLabel('Add photo or file').setInputFiles({ name: 'Mezzanine GA.pdf', mimeType: 'application/pdf', buffer: PDF })
+  await page.getByLabel('Add photo or file').setInputFiles({ name: 'Mezzanine GA.pdf', mimeType: 'application/pdf', buffer: TEST_PDF })
   await expect(page.getByText('Mezzanine GA.pdf')).toBeVisible()
 
   const png = await page.evaluate(async () => {
