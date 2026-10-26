@@ -1,14 +1,22 @@
+import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { formatDate, formatINR } from '@/lib/format'
 import { ESTIMATE_FIELDS } from '@/modules/projects/labels'
 import { getProject } from '@/modules/projects/queries'
+import { getQuotationRef } from '@/modules/quotations/queries'
 
 export default async function ProjectOverviewPage({ params }: PageProps<'/projects/[id]'>) {
   const { id } = await params
   const project = await getProject(id)
   if (!project) notFound()
+  const quotation = await getQuotationRef(project.quotation_id)
 
   const details: [string, React.ReactNode][] = [
+    ['From quotation', quotation && (
+      <Link href={`/quotes/${quotation.id}`} className="underline underline-offset-4">
+        {quotation.label}
+      </Link>
+    )],
     ['Site', project.site_address],
     ['Start date', project.start_date && formatDate(project.start_date)],
     ['Due date', project.due_date && formatDate(project.due_date)],

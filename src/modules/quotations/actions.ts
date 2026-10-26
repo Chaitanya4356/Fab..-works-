@@ -91,3 +91,16 @@ export async function setFollowUpDate(id: string, date: string): Promise<ActionR
   refreshQuotation(id)
   return ok(null)
 }
+
+/** Makes an accepted quotation into a project, once (spec 5): its price and cost sheet carry over. */
+export async function convertQuotation(id: string): Promise<ActionResult<{ projectId: string }>> {
+  const auth = await activeUserForAction()
+  if (!auth.ok) return auth
+  if (!idSchema.safeParse(id).success) return fail(MESSAGES.unexpected)
+
+  const { data, error } = await auth.data.supabase.rpc('convert_quotation', { p_quotation_id: id })
+  if (error) return fail(dbMessage(error))
+  refreshQuotation(id)
+  revalidatePath('/projects')
+  return ok({ projectId: data })
+}

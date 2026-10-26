@@ -2,6 +2,8 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { formatDate, formatINR } from '@/lib/format'
 import { paiseToRupees } from '@/lib/money'
+import { getProject } from '@/modules/projects/queries'
+import { ConvertButton } from '@/modules/quotations/components/convert-button'
 import { FollowUpForm } from '@/modules/quotations/components/follow-up-form'
 import { QuotationActions } from '@/modules/quotations/components/quotation-actions'
 import { QuotationStatusPill } from '@/modules/quotations/components/status-pill'
@@ -18,6 +20,7 @@ export default async function QuotationPage({ params }: PageProps<'/quotes/[id]'
   if (!quotation) notFound()
   const revisions = await listQuotationRevisions(quotation.quote_no)
   const live = revisions.find((r) => r.status !== 'superseded')
+  const project = quotation.project_id ? await getProject(quotation.project_id) : null
   const totals = storedTotals(quotation)
   const gstRate = quotation.gst_rate === null ? null : String(quotation.gst_rate)
 
@@ -62,6 +65,14 @@ export default async function QuotationPage({ params }: PageProps<'/quotes/[id]'
       </div>
 
       {quotation.status !== 'superseded' && <QuotationActions id={quotation.id} status={quotation.status} />}
+      {quotation.status === 'accepted' && !quotation.project_id && <ConvertButton quotationId={quotation.id} />}
+      {project && (
+        <div>
+          <Link href={`/projects/${project.id}`} className="button-secondary">
+            Project {project.project_no}
+          </Link>
+        </div>
+      )}
       {(quotation.status === 'draft' || quotation.status === 'sent') && (
         <FollowUpForm id={quotation.id} initial={quotation.follow_up_date ?? ''} />
       )}

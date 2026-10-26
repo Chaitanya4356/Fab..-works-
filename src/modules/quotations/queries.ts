@@ -184,3 +184,13 @@ export async function listQuotationRevisions(
     quoteDate: q.quote_date,
   }))
 }
+
+/** The number a quotation is known by, for linking to it from elsewhere (a project's Overview). */
+export async function getQuotationRef(id: string | null): Promise<{ id: string; label: string } | null> {
+  await requireActiveUser()
+  if (!id || !UUID.test(id)) return null
+  const supabase = await createClient()
+  const { data, error } = await supabase.from('quotations').select('id, quote_no, revision').eq('id', id).maybeSingle()
+  if (error) throw error
+  return data && { id: data.id, label: quoteLabel(data.quote_no, data.revision) }
+}
