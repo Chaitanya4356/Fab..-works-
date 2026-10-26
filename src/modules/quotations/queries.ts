@@ -1,6 +1,8 @@
 import 'server-only'
 import { cache } from 'react'
 import { requireActiveUser } from '@/lib/auth'
+import { isPastLastPage, pageRange } from '@/lib/paging'
+import { toSearch } from '@/lib/search'
 import { createClient } from '@/lib/supabase/server'
 import type { Database } from '@/lib/supabase/database.types'
 import { getCustomer } from '@/modules/customers/queries'
@@ -102,5 +104,83 @@ export async function listCustomerQuotations(
     title: q.title!,
     status: q.status as QuotationStatus,
     grandTotal: q.grand_total!,
+  }))
+}
+
+export type QuoteView = 'open' | 'follow_up' | 'accepted' | 'rejected' | 'all'
+
+export type QuoteListRow = {
+  id: string
+  label: string
+  title: string
+  customerName: string
+  status: QuotationStatus
+  grandTotal: number
+  followUpDue: boolean
+}
+
+const LIST_COLUMNS = 'id, quote_no, revision, title, customer_name, status, grand_total, is_follow_up_due'
+
+/** One page of live quotations, newest first. Search matches the number, title and customer. */
+export async function listQuotations(opts: {
+  q?: string
+  page: number
+  view: QuoteView
+}): Promise<{ rows: QuoteListRow[]; total: number }> {
+  await requireActiveUser()
+  const supabase = await createClient()
+  const { from, to } = pageRange(opts.page)
+  const search = toSearch(opts.q)
+  const filters = search ? ['quote_no', 'title', 'customer_name'].map((column) => `${column}.ilike."${search.text}"`) : []
+
+  const matching = (head: boolean) => {
+    let query = supabase.from('quotation_list_v').select(LIST_COLUMNS, { count: 'exact', head })
+    if (opts.view === 'open') query = query.in('status', ['draft', 'sent'])
+    else if (opts.view === 'follow_up') query = query.eq('is_follow_up_due', true)
+    else if (opts.view !== 'all') query = query.eq('status', opts.view)
+    return filters.length ? query.or(filters.join(',')) : query
+  }
+
+  const { data, error, count } = await matching(false)
+    .order('quote_date', { ascending: false, nullsFirst: false })
+    .order('quote_no', { ascending: false })
+    .range(from, to)
+  if (isPastLastPage(error)) {
+    const { count: total, error: countError } = await matching(true)
+    if (countError) throw countError
+    return { rows: [], total: total ?? 0 }
+  }
+  if (error) throw error
+  return {
+    rows: data.map((q) => ({
+      id: q.id!,
+      label: quoteLabel(q.quote_no!, q.revision!),
+      title: q.title!,
+      customerName: q.customer_name!,
+      status: q.status as QuotationStatus,
+      grandTotal: q.grand_total!,
+      followUpDue: q.is_follow_up_due ?? false,
+    })),
+    total: count ?? 0,
+  }
+}
+
+/** Every revision of a quotation number, newest first, replaced ones included. */
+export async function listQuotationRevisions(
+  quoteNo: string,
+): Promise<{ id: string; label: string; status: QuotationStatus; quoteDate: string | null }[]> {
+  await requireActiveUser()
+  const supabase = await createClient()
+  const { data, error } = await supabase
+    .from('quotations')
+    .select('id, quote_no, revision, status, quote_date')
+    .eq('quote_no', quoteNo)
+    .order('revision', { ascending: false })
+  if (error) throw error
+  return data.map((q) => ({
+    id: q.id,
+    label: quoteLabel(q.quote_no, q.revision),
+    status: q.status as QuotationStatus,
+    quoteDate: q.quote_date,
   }))
 }

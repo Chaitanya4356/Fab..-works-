@@ -2,11 +2,13 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { formatDate, formatINR } from '@/lib/format'
 import { paiseToRupees } from '@/lib/money'
+import { FollowUpForm } from '@/modules/quotations/components/follow-up-form'
+import { QuotationActions } from '@/modules/quotations/components/quotation-actions'
 import { QuotationStatusPill } from '@/modules/quotations/components/status-pill'
 import { TotalsBlock } from '@/modules/quotations/components/totals-block'
-import { CATEGORY_LABELS } from '@/modules/quotations/labels'
+import { CATEGORY_LABELS, STATUS_LABELS } from '@/modules/quotations/labels'
 import { storedTotals } from '@/modules/quotations/maths'
-import { getQuotation } from '@/modules/quotations/queries'
+import { getQuotation, listQuotationRevisions } from '@/modules/quotations/queries'
 
 const qtyText = (qty: number) => qty.toLocaleString('en-IN', { maximumFractionDigits: 3 })
 
@@ -14,6 +16,8 @@ export default async function QuotationPage({ params }: PageProps<'/quotes/[id]'
   const { id } = await params
   const quotation = await getQuotation(id)
   if (!quotation) notFound()
+  const revisions = await listQuotationRevisions(quotation.quote_no)
+  const live = revisions.find((r) => r.status !== 'superseded')
   const totals = storedTotals(quotation)
   const gstRate = quotation.gst_rate === null ? null : String(quotation.gst_rate)
 
@@ -37,6 +41,17 @@ export default async function QuotationPage({ params }: PageProps<'/quotes/[id]'
           </Link>
           <QuotationStatusPill status={quotation.status} />
         </div>
+        {quotation.status === 'superseded' && live && (
+          <p className="text-sm">
+            Replaced by{' '}
+            <Link href={`/quotes/${live.id}`} className="underline underline-offset-4">
+              {live.label}
+            </Link>
+          </p>
+        )}
+        {quotation.status === 'rejected' && quotation.rejection_reason && (
+          <p className="text-sm">Rejected: {quotation.rejection_reason}</p>
+        )}
         {quotation.status === 'draft' && (
           <div>
             <Link href={`/quotes/${quotation.id}/edit`} className="button-secondary">
@@ -45,6 +60,11 @@ export default async function QuotationPage({ params }: PageProps<'/quotes/[id]'
           </div>
         )}
       </div>
+
+      {quotation.status !== 'superseded' && <QuotationActions id={quotation.id} status={quotation.status} />}
+      {(quotation.status === 'draft' || quotation.status === 'sent') && (
+        <FollowUpForm id={quotation.id} initial={quotation.follow_up_date ?? ''} />
+      )}
 
       <dl className="grid gap-x-6 gap-y-3 rounded border border-line bg-surface p-4 sm:grid-cols-2">
         {details
@@ -145,6 +165,29 @@ export default async function QuotationPage({ params }: PageProps<'/quotes/[id]'
           </p>
         </div>
       </section>
+
+      {revisions.length > 1 && (
+        <section className="flex flex-col gap-2">
+          <h2 className="text-lg font-semibold">Revisions</h2>
+          <ul aria-label="Revisions" className="flex flex-col divide-y divide-line rounded border border-line bg-surface">
+            {revisions.map((r) => (
+              <li key={r.id} className="flex flex-wrap items-center gap-x-3 px-4 py-1">
+                {r.id === quotation.id ? (
+                  <span className="inline-flex min-h-11 items-center font-mono text-sm">{r.label} (this revision)</span>
+                ) : (
+                  <Link href={`/quotes/${r.id}`} className="inline-flex min-h-11 items-center font-mono text-sm underline-offset-4 hover:underline">
+                    {r.label}
+                  </Link>
+                )}
+                <span className="text-sm text-muted">
+                  {STATUS_LABELS[r.status]}
+                  {r.quoteDate && ` · ${formatDate(r.quoteDate)}`}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </section>
   )
 }
