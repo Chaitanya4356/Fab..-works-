@@ -16,13 +16,30 @@ test('the owner logs in, uses the phone menu and logs out', async ({ page }) => 
   await login(page, OWNER)
   await expect(page).toHaveURL('/')
   const nav = page.getByRole('navigation', { name: 'Main' })
-  for (const label of ['Home', 'Projects', 'Quotes', 'Money', 'More']) {
+  for (const label of ['Home', 'Customers', 'Projects', 'Quotes', 'Money', 'More']) {
     await expect(nav.getByRole('link', { name: label })).toBeVisible()
   }
   expect((await nav.getByRole('link', { name: 'Home' }).boundingBox())!.height).toBeGreaterThanOrEqual(44)
+  await nav.getByRole('link', { name: 'Customers' }).click()
+  await expect(page.getByRole('heading', { name: 'Customers' })).toBeVisible()
+  await expect(nav.getByRole('link', { name: 'Customers' })).toHaveAttribute('aria-current', 'page')
   await nav.getByRole('link', { name: 'More' }).click()
+  await expect(page.getByRole('main').getByRole('link', { name: 'Customers' })).toHaveCount(0)
   await page.getByRole('button', { name: 'Log out' }).click()
   await expect(page).toHaveURL(/\/login$/)
+})
+
+test.describe('on a small phone', () => {
+  // 360 px is the narrowest common Android width.
+  test.use({ viewport: { width: 360, height: 780 } })
+  test('every menu label fits its slot', async ({ page }) => {
+    await login(page, OWNER)
+    const links = page.getByRole('navigation', { name: 'Main' }).getByRole('link')
+    await expect(links).toHaveCount(6)
+    for (const link of await links.all()) {
+      expect(await link.evaluate((el) => el.scrollWidth <= el.clientWidth), await link.innerText()).toBe(true)
+    }
+  })
 })
 
 test.describe('on a wide screen', () => {
