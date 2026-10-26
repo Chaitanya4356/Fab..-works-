@@ -9,6 +9,8 @@ test('the new list and form controls are big enough to tap on a phone', async ({
 
   await page.goto('/customers')
   await tall(page.getByRole('link', { name: 'Show switched-off customers' }))
+  // Searched for, so customers added by earlier tests cannot push it to page 2.
+  await page.goto('/customers?q=Tap+Target')
   const row = page.getByRole('row', { name: /Tap Target Traders/ })
   await tall(row.getByRole('link', { name: 'Tap Target Traders' }))
   await tall(row.getByRole('link', { name: '9876500000' }))
@@ -24,6 +26,6 @@ test('the new list and form controls are big enough to tap on a phone', async ({
   await page.getByRole('button', { name: 'Create project' }).click()
   await tall(page.getByRole('link', { name: 'Tap Target Traders' }))
 
-  await page.goto('/projects')
+  await page.goto('/projects?q=Tap+target')
   await tall(page.getByRole('row', { name: /Tap target shed/ }).getByRole('link', { name: 'Tap target shed' }))
 })

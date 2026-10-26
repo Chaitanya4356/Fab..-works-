@@ -10,6 +10,7 @@ import {
   type DocType,
 } from '@/lib/doc-number'
 import { financialYear } from '@/lib/fy'
+import { runAction } from '@/lib/run-action'
 import { saveDocNumberFormats } from '../actions'
 import type { DocNumberFormatRow } from '../queries'
 
@@ -66,7 +67,7 @@ export function DocNumberFormats({
       const loaded = Object.fromEntries(
         DOC_TYPES.map((t) => [t, { nextNumber: initial[t].nextNumber, yearStyle: initial[t].yearStyle }]),
       )
-      const result = await saveDocNumberFormats({ formats: drafts, loaded })
+      const result = await runAction(() => saveDocNumberFormats({ formats: drafts, loaded }))
       setFieldErrors(result.ok ? {} : (result.fieldErrors ?? {}))
       setMessage(result.ok ? { text: 'Numbering saved', good: true } : { text: result.message, good: false })
     })

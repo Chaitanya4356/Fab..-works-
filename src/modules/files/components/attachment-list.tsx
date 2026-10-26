@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { formatBytes, formatDate } from '@/lib/format'
 import { uploadFile } from '@/lib/upload/upload-file'
+import { runAction } from '@/lib/run-action'
 import { recordAttachment, removeAttachment } from '../actions'
 import type { AttachmentEntityType } from '../paths'
 import type { AttachmentRow } from '../queries'
@@ -36,14 +37,16 @@ export function AttachmentList({
           problems.push(`${file.name}: ${uploaded.message}`)
           continue
         }
-        const recorded = await recordAttachment({
-          entityType,
-          entityId,
-          path: uploaded.path,
-          fileName: uploaded.name,
-          mimeType: uploaded.type || null,
-          sizeBytes: uploaded.size,
-        })
+        const recorded = await runAction(() =>
+          recordAttachment({
+            entityType,
+            entityId,
+            path: uploaded.path,
+            fileName: uploaded.name,
+            mimeType: uploaded.type || null,
+            sizeBytes: uploaded.size,
+          }),
+        )
         if (!recorded.ok) problems.push(`${file.name}: ${recorded.message}`)
       }
       setProgress(null)
@@ -54,7 +57,7 @@ export function AttachmentList({
 
   const remove = (id: string) =>
     startTransition(async () => {
-      const result = await removeAttachment(id)
+      const result = await runAction(() => removeAttachment(id))
       setConfirming(null)
       setErrors(result.ok ? [] : [result.message])
       router.refresh()

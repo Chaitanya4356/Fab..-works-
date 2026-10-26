@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { runAction } from '@/lib/run-action'
 import { resetUserPassword, setUserActive } from '../actions'
 import type { UserRow } from '../queries'
 
@@ -13,7 +14,7 @@ export function UserRowActions({ user }: { user: UserRow }) {
 
   const switchTo = (active: boolean) =>
     startTransition(async () => {
-      const result = await setUserActive({ userId: user.id, active })
+      const result = await runAction(() => setUserActive({ userId: user.id, active }))
       setConfirming(false)
       setMessage(result.ok ? null : result.message)
     })
@@ -21,7 +22,7 @@ export function UserRowActions({ user }: { user: UserRow }) {
   const savePassword = (e: React.FormEvent) => {
     e.preventDefault()
     startTransition(async () => {
-      const result = await resetUserPassword({ userId: user.id, password })
+      const result = await runAction(() => resetUserPassword({ userId: user.id, password }))
       if (result.ok) {
         setResetting(false)
         setPassword('')

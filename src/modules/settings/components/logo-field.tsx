@@ -3,6 +3,7 @@
 import { useState, useTransition } from 'react'
 import { uploadFile } from '@/lib/upload/upload-file'
 import { getFileUrl } from '@/modules/files/actions'
+import { runAction } from '@/lib/run-action'
 import { removeLogo, setLogo } from '../actions'
 
 export function LogoField({ initialUrl }: { initialUrl: string | null }) {
@@ -18,9 +19,9 @@ export function LogoField({ initialUrl }: { initialUrl: string | null }) {
       setMessage(null)
       const uploaded = await uploadFile(file, { kind: 'logo' }, { maxSide: 600 })
       if (!uploaded.ok) return setMessage(uploaded.message)
-      const saved = await setLogo(uploaded.path)
+      const saved = await runAction(() => setLogo(uploaded.path))
       if (!saved.ok) return setMessage(saved.message)
-      const link = await getFileUrl(uploaded.path)
+      const link = await runAction(() => getFileUrl(uploaded.path))
       if (!link.ok) return setMessage(link.message)
       setUrl(link.data.url)
     })
@@ -28,7 +29,7 @@ export function LogoField({ initialUrl }: { initialUrl: string | null }) {
 
   const remove = () =>
     startTransition(async () => {
-      const result = await removeLogo()
+      const result = await runAction(() => removeLogo())
       if (result.ok) setUrl(null)
       else setMessage(result.message)
     })

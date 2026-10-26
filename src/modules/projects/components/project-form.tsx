@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { FormMessage, TextField } from '@/components/text-field'
+import { runAction } from '@/lib/run-action'
 import { createProject, updateProject } from '../actions'
 import type { ProjectFormValues } from '../form-values'
 import { ESTIMATE_FIELDS, PROJECT_STATUSES, STATUS_LABELS } from '../labels'
@@ -33,7 +34,7 @@ export function ProjectForm({
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     startTransition(async () => {
-      const result = projectId ? await updateProject(projectId, values) : await createProject(values)
+      const result = await runAction(() => (projectId ? updateProject(projectId, values) : createProject(values)))
       if (!result.ok) {
         setFieldErrors(result.fieldErrors ?? {})
         setMessage({ text: result.message, good: false })

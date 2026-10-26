@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { runAction } from '@/lib/run-action'
 import { createUser } from '../actions'
 
 const EMPTY = { fullName: '', phone: '', email: '', password: '' }
@@ -18,7 +19,7 @@ export function AddUserForm() {
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     startTransition(async () => {
-      const result = await createUser(values)
+      const result = await runAction(() => createUser(values))
       if (result.ok) {
         setValues(EMPTY)
         setMessage(null)

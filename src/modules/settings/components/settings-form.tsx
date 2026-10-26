@@ -2,6 +2,7 @@
 
 import { useState, useTransition } from 'react'
 import { INDIA_STATES } from '@/lib/india-states'
+import { runAction } from '@/lib/run-action'
 import { updateSettings } from '../actions'
 
 export type SettingsFormValues = {
@@ -41,7 +42,7 @@ export function SettingsForm({ initial }: { initial: SettingsFormValues }) {
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     startTransition(async () => {
-      const result = await updateSettings(values)
+      const result = await runAction(() => updateSettings(values))
       setFieldErrors(result.ok ? {} : (result.fieldErrors ?? {}))
       setMessage(result.ok ? { text: 'Saved', good: true } : { text: result.message, good: false })
     })

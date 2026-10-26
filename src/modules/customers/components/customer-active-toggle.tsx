@@ -1,6 +1,7 @@
 'use client'
 
 import { useState, useTransition } from 'react'
+import { runAction } from '@/lib/run-action'
 import { setCustomerActive } from '../actions'
 
 export function CustomerActiveToggle({ id, isActive }: { id: string; isActive: boolean }) {
@@ -10,7 +11,7 @@ export function CustomerActiveToggle({ id, isActive }: { id: string; isActive: b
 
   const switchTo = (active: boolean) =>
     startTransition(async () => {
-      const result = await setCustomerActive(id, active)
+      const result = await runAction(() => setCustomerActive(id, active))
       setConfirming(false)
       setMessage(result.ok ? null : result.message)
     })

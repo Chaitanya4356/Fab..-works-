@@ -4,6 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useState, useTransition } from 'react'
 import { FormMessage, TextField } from '@/components/text-field'
 import { INDIA_STATES } from '@/lib/india-states'
+import { runAction } from '@/lib/run-action'
 import { createCustomer, updateCustomer } from '../actions'
 import type { CustomerFormValues } from '../form-values'
 
@@ -32,7 +33,7 @@ export function CustomerForm({
   const submit = (e: React.FormEvent) => {
     e.preventDefault()
     startTransition(async () => {
-      const result = customerId ? await updateCustomer(customerId, values) : await createCustomer(values)
+      const result = await runAction(() => (customerId ? updateCustomer(customerId, values) : createCustomer(values)))
       if (!result.ok) {
         setFieldErrors(result.fieldErrors ?? {})
         setMessage({ text: result.message, good: false })
