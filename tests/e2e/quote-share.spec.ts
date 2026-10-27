@@ -46,3 +46,18 @@ test('where the phone can share files, the PDF goes to the share sheet', async (
     text: expect.stringContaining(`Quotation ${quote.quoteNo} from`),
   })
 })
+
+test('if the browser blocks the WhatsApp window, a link to open it is shown', async ({ page }) => {
+  await page.addInitScript(() => {
+    Object.defineProperty(navigator, 'canShare', { value: () => false, configurable: true })
+    window.open = (() => null) as typeof window.open
+  })
+  const customerId = await createTestCustomer({ name: 'Blocked Window Traders', phone: '9876500222' })
+  const quote = await createTestQuotation({ customerId, title: 'Blocked window shed', items: [{ description: 'Shed', qty: 1, rate: 60000 }] })
+  await page.goto(`/quotes/${quote.id}`)
+  await page.getByRole('button', { name: 'Share on WhatsApp' }).click()
+
+  const link = page.getByRole('link', { name: 'Open WhatsApp' })
+  await expect(link).toHaveAttribute('href', /^https:\/\/wa\.me\/919876500222\?text=/)
+  await expect(link).toHaveAttribute('target', '_blank')
+})
