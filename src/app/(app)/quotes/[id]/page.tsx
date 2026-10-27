@@ -64,6 +64,11 @@ export default async function QuotationPage({ params }: PageProps<'/quotes/[id]'
         )}
       </div>
 
+      <div>
+        <a href={`/api/pdf/quotation/${quotation.id}`} target="_blank" rel="noreferrer" className="button-secondary">
+          PDF
+        </a>
+      </div>
       {quotation.status !== 'superseded' && <QuotationActions id={quotation.id} status={quotation.status} />}
       {quotation.status === 'accepted' && !quotation.project_id && <ConvertButton quotationId={quotation.id} />}
       {project && (
