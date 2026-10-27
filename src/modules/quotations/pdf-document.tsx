@@ -138,8 +138,11 @@ export function QuotationPdf({ model, logo }: { model: QuotationPdfModel; logo: 
         <Text style={styles.words}>{model.amountInWords}</Text>
 
         {model.terms.length > 0 && (
-          <View style={styles.terms} wrap={false}>
-            <Text style={styles.label}>Terms</Text>
+          <View style={styles.terms}>
+            {/* Terms may be long: they run onto the next page rather than being cut off. */}
+            <Text style={styles.label} minPresenceAhead={40}>
+              Terms
+            </Text>
             {model.terms.map((term) => (
               <Text key={term}>{term}</Text>
             ))}

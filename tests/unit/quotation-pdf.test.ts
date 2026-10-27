@@ -1,3 +1,4 @@
+import { inflateSync } from 'node:zlib'
 import { describe, expect, it } from 'vitest'
 import { renderQuotationPdf } from '@/modules/quotations/pdf-document'
 import { quotationPdfModel, type QuotationPdfSource } from '@/modules/quotations/pdf-model'
@@ -39,3 +40,35 @@ describe('quotation PDF', () => {
     expect(pdf.toString('latin1')).toContain('NotoSans')
   })
 })
+
+describe('long terms', () => {
+  /** How many lines of text each page draws: every text run is one "Tm" in that page's content stream. */
+  const linesPerPage = (pdf: Buffer) => {
+    const text = pdf.toString('latin1')
+    const counts: number[] = []
+    for (const m of text.matchAll(/stream\r?\n/g)) {
+      const start = m.index! + m[0].length
+      const end = text.indexOf('endstream', start)
+      try {
+        const runs = (inflateSync(pdf.subarray(start, end)).toString('latin1').match(/ Tm\b/g) ?? []).length
+        if (runs > 0) counts.push(runs)
+      } catch {
+        // Not a compressed page stream (an image or a font): nothing to count.
+      }
+    }
+    return counts
+  }
+  // An A4 page at this size holds about 60 lines; more than that on one page means text is drawn below its edge.
+  const MOST_LINES_THAT_FIT = 80
+
+  it('continue on the next page instead of running off the bottom', async () => {
+    const terms = Array.from({ length: 150 }, (_, i) => `Term ${i + 1}: payment and delivery condition`).join('\n')
+    const counts = linesPerPage(await renderQuotationPdf(quotationPdfModel({ ...source, terms }), null))
+    expect(counts.length).toBeGreaterThan(2)
+    expect(Math.max(...counts)).toBeLessThanOrEqual(MOST_LINES_THAT_FIT)
+  })
+  it('keep short terms on one page', async () => {
+    expect(linesPerPage(await renderQuotationPdf(quotationPdfModel(source), null))).toHaveLength(1)
+  })
+})
+
