@@ -6,11 +6,14 @@ import { getProject } from '@/modules/projects/queries'
 import { ConvertButton } from '@/modules/quotations/components/convert-button'
 import { FollowUpForm } from '@/modules/quotations/components/follow-up-form'
 import { QuotationActions } from '@/modules/quotations/components/quotation-actions'
+import { ShareOnWhatsApp } from '@/modules/quotations/components/share-button'
 import { QuotationStatusPill } from '@/modules/quotations/components/status-pill'
 import { TotalsBlock } from '@/modules/quotations/components/totals-block'
-import { CATEGORY_LABELS, STATUS_LABELS } from '@/modules/quotations/labels'
+import { CATEGORY_LABELS, STATUS_LABELS, pdfFileName } from '@/modules/quotations/labels'
+import { quotationShareText } from '@/modules/quotations/pdf-model'
 import { storedTotals } from '@/modules/quotations/maths'
 import { getQuotation, listQuotationRevisions } from '@/modules/quotations/queries'
+import { getSettings } from '@/modules/settings/queries'
 
 const qtyText = (qty: number) => qty.toLocaleString('en-IN', { maximumFractionDigits: 3 })
 
@@ -21,6 +24,7 @@ export default async function QuotationPage({ params }: PageProps<'/quotes/[id]'
   const revisions = await listQuotationRevisions(quotation.quote_no)
   const live = revisions.find((r) => r.status !== 'superseded')
   const project = quotation.project_id ? await getProject(quotation.project_id) : null
+  const settings = await getSettings()
   const totals = storedTotals(quotation)
   const gstRate = quotation.gst_rate === null ? null : String(quotation.gst_rate)
 
@@ -69,6 +73,18 @@ export default async function QuotationPage({ params }: PageProps<'/quotes/[id]'
           PDF
         </a>
       </div>
+      {quotation.status !== 'superseded' && (
+        <ShareOnWhatsApp
+          quotationId={quotation.id}
+          fileName={pdfFileName(quotation.label)}
+          text={quotationShareText({
+            workshopName: settings.workshop_name,
+            label: quotation.label,
+            title: quotation.title,
+            grandTotal: quotation.grand_total,
+          })}
+        />
+      )}
       {quotation.status !== 'superseded' && <QuotationActions id={quotation.id} status={quotation.status} />}
       {quotation.status === 'accepted' && !quotation.project_id && <ConvertButton quotationId={quotation.id} />}
       {project && (

@@ -111,3 +111,8 @@ export function quotationPdfModel(src: QuotationPdfSource): QuotationPdfModel {
     signature: `For ${workshop.name}`,
   }
 }
+
+/** The message that goes with a shared quotation. */
+export function quotationShareText(m: { workshopName: string; label: string; title: string; grandTotal: number }): string {
+  return `Quotation ${m.label} from ${m.workshopName} for ${m.title}: ${formatINR(m.grandTotal)}`
+}
